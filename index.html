@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="portal-build" content="1015a">
+<title>Menu Portal · b1015a</title>
+<script>try { if (!localStorage.getItem("portal_key")) location.replace("login.html"); } catch (e) { location.replace("login.html"); }</script>
+<link rel="stylesheet" href="portal.css">
+</head>
+<body>
+<div class="landing">
+<div class="wrap">
+  <header class="bar">
+    <span class="brand">Menu Portal</span><span class="grow"></span>
+    <span class="who" id="who"></span><button class="linkbtn" id="out" type="button">Sign out</button>
+  </header>
+</div>
+<main class="wrap home">
+  <h1>Menu Studio</h1>
+  <p class="sub">Aspen Snowmass</p>
+  <div class="tiles" id="tiles" aria-live="polite"></div>
+</main>
+</div>
+<script src="portal.js"></script>
+<script>
+(function () {
+  /* The buckets this portal knows. A code from the Access sheet switches each one on or off. */
+  var BUCKETS = {
+    "wine-lists":    { href: "wine-lists.html",    blurb: "Wine, spirits, and liquor lists.", allLabel: "Fine-dining restaurants" },
+    "special-menus": { href: "special-menus.html", blurb: "Group menus, dinner menus, daily specials and more." },
+    "signage":       { href: "signage.html",       blurb: "Simple quick-print signs in the Aspen Snowmass brand fonts." }
+  };
+  var esc = function (s) { var d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; };
+  document.getElementById("out").addEventListener("click", PORTAL.signOut);
+  PORTAL.gate(null).then(function (s) {
+    var ent = s.ent || {};
+    document.getElementById("who").textContent = s.email || "";
+    var venues = ent.allProperties ? "All restaurants" : (ent.properties || []).map(function (p) { return p.name; }).join(", ") || "No restaurants assigned";
+    var tiles = (ent.buckets || []).filter(function (b) { return BUCKETS[b.id]; }).map(function (b) {
+      var B = BUCKETS[b.id];
+      return '<a class="tile" href="' + B.href + '"><b>' + esc(b.name) + '</b><p>' + esc(B.blurb) + '</p>' +
+             '<span class="scope">' + esc(ent.allProperties && B.allLabel ? B.allLabel : venues) + '</span><span class="go">Open</span></a>';
+    });
+    document.getElementById("tiles").innerHTML = tiles.length ? tiles.join("")
+      : '<div class="empty">Your access code is valid, but no tools are switched on for it yet. Ask F&amp;B leadership to tick one on the Access sheet.</div>';
+  });
+})();
+</script>
+</body>
+</html>

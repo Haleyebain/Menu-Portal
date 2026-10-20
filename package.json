@@ -1,0 +1,9 @@
+{
+  "name": "menu-portal",
+  "private": true,
+  "type": "module",
+  "description": "Menu Portal: sign in once, open the Wine Lists and Special Menus studios your access code covers.",
+  "dependencies": {
+    "@netlify/blobs": "^10.7.13"
+  }
+}

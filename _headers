@@ -1,0 +1,22 @@
+# Keep the portal out of search engines and out of frames.
+/*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Storage and the door must never be cached.
+/api/*
+  Cache-Control: no-store
+
+# HTML always revalidates, so a deploy shows up on the next load.
+/*.html
+  Cache-Control: no-cache, must-revalidate
+/
+  Cache-Control: no-cache, must-revalidate
+
+# Fonts, logos and the PDF libraries change rarely.
+/assets/*
+  Cache-Control: public, max-age=604800
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable

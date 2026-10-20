@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Basic Signage · Menu Portal · b1015a</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="portal-build" content="1015a">
+<script>try { if (!localStorage.getItem("portal_key")) location.replace("login.html?next=" + encodeURIComponent(location.pathname.split("/").pop() || "")); } catch (e) { location.replace("login.html"); }</script>
+<style>
+@font-face{font-family:"SMS Whitney";src:url(assets/fonts/whitney-book.otf) format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"SMS Whitney";src:url(assets/fonts/whitney-bold.otf) format("opentype");font-weight:600 700;font-display:swap}
+@font-face{font-family:"Sign Whitney";src:url(assets/fonts/whitney-bold.otf) format("opentype");font-weight:700;font-display:block}
+@font-face{font-family:"Sign Nantes";src:url(assets/fonts/nantes-semibold.otf) format("opentype");font-weight:600;font-display:block}
+/* Layout: same two-pane workbench as the menu studios. Fields on the left, the printed sign on the right. */
+:root{
+  --bg:#EEF0F2; --panel:#FFFFFF; --panel-2:#F6F7F8; --ink:#1E2730; --muted:#5F6A75; --line:#D6DBE0; --line-2:#E6E9EC;
+  --gold:#F70700; --gold-ink:#FFFFFF; --focus:#2F6FB3; --danger:#B3261E; --danger-bg:#FBEAE9;
+  --stage:#D9DDE1; --chip:#E8ECEF; --ok:#2E7D4F;
+  --ui:"SMS Whitney","Whitney",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171C; --panel:#192028; --panel-2:#1E262F; --ink:#E6EAEE; --muted:#9AA5B0; --line:#2E3A45; --line-2:#26303A;
+  --focus:#7FB2EA; --danger:#F2B8B5; --danger-bg:#3A1E1D; --stage:#0D1115; --chip:#26303A; --ok:#7CC79A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#12171C; --panel:#192028; --panel-2:#1E262F; --ink:#E6EAEE; --muted:#9AA5B0; --line:#2E3A45; --line-2:#26303A;
+  --focus:#7FB2EA; --danger:#F2B8B5; --danger-bg:#3A1E1D; --stage:#0D1115; --chip:#26303A; --ok:#7CC79A; color-scheme:dark }
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 var(--ui);margin:0}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.app{display:flex;flex-direction:column;height:100%}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:4px}
+.brand b{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px}
+.brand span{color:var(--muted);font-size:12px}
+.grow{flex:1}
+select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:6px 8px;min-height:32px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:6px 11px;min-height:32px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--gold-ink);font-weight:700}
+.btn.danger{color:var(--danger)}
+.btn.armed{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn svg{width:15px;height:15px}
+.status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
+.status.ok i{background:var(--ok)} .status.busy i{background:var(--gold)} .status.err i{background:var(--danger)}
+.status.err{color:var(--danger)}
+
+.main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(320px,460px) 1fr}
+.ed{overflow:auto;padding:16px max(16px,env(safe-area-inset-left,0px)) 40px;display:grid;gap:14px;align-content:start;border-right:1px solid var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:12px}
+.card h2{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.fld{display:grid;gap:5px}
+.fld label{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.fld textarea,.fld input[type=text]{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:8px 9px;min-height:36px;resize:vertical}
+.fld textarea{min-height:60px;line-height:1.35;resize:none;overflow:hidden}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chk{display:flex;gap:8px;align-items:center;font-size:13px}
+.chk input{accent-color:var(--gold);width:16px;height:16px}
+.rng{display:flex;align-items:center;gap:8px}
+.rng input{accent-color:var(--gold);flex:1}
+.rng output{font-size:12px;color:var(--muted);min-width:38px;text-align:right;font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--muted);margin:0}
+.tpls{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tpl{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:8px;cursor:pointer;display:grid;gap:6px;justify-items:center;text-align:center;font-size:12px}
+.tpl[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold)}
+.tpl .mini{background:var(--panel-2);border:1px solid var(--line-2);display:grid}
+.tpl small{color:var(--muted)}
+.quad{border-top:1px solid var(--line-2);padding-top:10px;display:grid;gap:10px}
+.quad b{font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+
+.pv{overflow:auto;background:var(--stage);display:flex;flex-direction:column;align-items:center;padding:20px 16px 40px;gap:8px}
+.pv-info{font-size:12px;color:var(--muted);align-self:stretch;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.pv-scale{transform-origin:top left}
+.pv-wrap{position:relative;box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.empty{padding:40px 16px;text-align:center;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:8px;font-size:13px;z-index:20;max-width:calc(100vw - 32px)}
+@media (max-width: 800px){ .main{grid-template-columns:1fr} .ed{border-right:0;border-bottom:1px solid var(--line)} }
+
+/* ---------- printed sign: fixed geometry in CSS px (96 per inch). Never themed. ---------- */
+.sg-page{position:relative;background:#fff;overflow:hidden;color:#1A1A1A}
+.sg-slot{position:absolute;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.sg-in{flex:none;text-align:left}
+.sg-t{font:700 100px/1.22 "Sign Whitney",sans-serif;letter-spacing:-.025em;white-space:pre-wrap;overflow-wrap:normal}
+.sg-s{font:600 40px/1.2 "Sign Nantes",Georgia,serif;white-space:pre-wrap;overflow-wrap:normal}
+.sg-guide{position:absolute;border:0 dashed #B8BEC4}
+#exporthost{position:fixed;left:-30000px;top:0;pointer-events:none}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><b>Basic Signage</b><span>Aspen Snowmass</span></div>
+    <select id="signSel" aria-label="Sign"></select>
+    <button class="btn" id="newBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>New sign</button>
+    <span class="grow"></span>
+    <span class="status" id="status"><i></i><span>Loading…</span></span>
+    <button class="btn primary" id="pdfBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>Export PDF</button>
+  </header>
+  <div class="main">
+    <div class="ed" id="ed"><div class="empty">Loading signs…</div></div>
+    <div class="pv" id="pv"><div class="pv-info"><span id="pvInfo"></span><span id="pvFit"></span></div><div id="pvHost"></div></div>
+  </div>
+</div>
+<div id="exporthost" aria-hidden="true"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="portal.js"></script>
+<script src="vendor/pdf-lib.min.js"></script>
+<script src="vendor/fontkit.umd.min.js"></script>
+<script>
+(() => {
+"use strict";
+/* Templates from "Basic Signage.pdf". Sizes are CSS px at 96 per inch; pdf is the page in points.
+   Each slot is the printable area of one sign. The text block is always left aligned and centred in it,
+   both ways. wrap is the line length at the template size; it grows as the text gets smaller. */
+const TEMPLATES = {
+  portrait:  { name: "Portrait sign", size: "8.5 × 11 in", W: 816, H: 1056, pdf: [612, 792],
+               slots: [{ x: 60, y: 60, w: 696, h: 936, wrap: 430 }], t: 121.6, s: 41, gap: 37 },
+  landscape: { name: "Landscape sign", size: "11 × 8.5 in", W: 1056, H: 816, pdf: [792, 612],
+               slots: [{ x: 60, y: 60, w: 936, h: 696, wrap: 650 }], t: 129.5, s: 44, gap: 34 },
+  quad:      { name: "Four small signs", size: "four 4.25 × 5.5 in on 8.5 × 11 in", W: 816, H: 1056, pdf: [612, 792],
+               slots: [{ x: 30, y: 30, w: 348, h: 468, wrap: 255 }, { x: 438, y: 30, w: 348, h: 468, wrap: 255 }, { x: 30, y: 558, w: 348, h: 468, wrap: 255 }, { x: 438, y: 558, w: 348, h: 468, wrap: 255 }], t: 70.8, s: 24, gap: 25, cut: true },
+};
+const DEFAULT_TEXT = { title: "Title here for in house printing", sub: "Sub head here" };
+const FONT_FILES = [["Sign Whitney", "whit", "700", "assets/fonts/whitney-bold.otf"], ["Sign Nantes", "nantes", "600", "assets/fonts/nantes-semibold.otf"]];
+
+const S = { db: null, downloads: null, docs: new Map(), id: null, sign: null, loaded: false, dirty: false, saving: false, again: false, fit: [] };
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const ed = $("#ed");
+
+function normalize(d) {
+  d = d && typeof d === "object" ? d : {};
+  d.name = String(d.name || "Untitled sign");
+  d.template = TEMPLATES[d.template] ? d.template : "portrait";
+  d.items = Array.isArray(d.items) ? d.items : [];
+  while (d.items.length < 4) d.items.push({ title: d.items[0]?.title ?? DEFAULT_TEXT.title, sub: d.items[0]?.sub ?? DEFAULT_TEXT.sub });
+  d.items = d.items.slice(0, 4).map(it => ({ title: String(it.title ?? ""), sub: String(it.sub ?? "") }));
+  d.same = d.same !== false;
+  d.scale = Math.min(1, Math.max(0.3, +d.scale || 1));
+  return d;
+}
+function newSign(template) {
+  return normalize({ name: TEMPLATES[template].name, template, items: [clone(DEFAULT_TEXT)], same: true, scale: 1 });
+}
+const itemsFor = d => { const T = TEMPLATES[d.template]; return T.slots.map((_, i) => d.same ? d.items[0] : d.items[i]); };
+
+/* ---------- the printed page ---------- */
+function slotHTML(T, slot, it, k) {
+  return `<div class="sg-slot" data-slot="${k}" style="left:${slot.x}px;top:${slot.y}px;width:${slot.w}px;height:${slot.h}px">
+    <div class="sg-in" style="width:${slot.wrap}px">
+      <div class="sg-t" style="font-size:${T.t}px">${esc(it.title)}</div>
+      ${it.sub ? `<div class="sg-s" style="font-size:${T.s}px;margin-top:${T.gap}px">${esc(it.sub)}</div>` : ""}
+    </div>
+  </div>`;
+}
+function pageHTML(d, forPrint) {
+  const T = TEMPLATES[d.template];
+  const guides = T.cut && !forPrint ? `<div class="sg-guide" style="left:${T.W / 2}px;top:0;height:${T.H}px;border-left-width:1px"></div><div class="sg-guide" style="top:${T.H / 2}px;left:0;width:${T.W}px;border-top-width:1px"></div>` : "";
+  return `<div class="sg-page" data-tpl="${d.template}" style="width:${T.W}px;height:${T.H}px">${guides}${T.slots.map((sl, k) => slotHTML(T, sl, itemsFor(d)[k], k)).join("")}</div>`;
+}
+/* the largest size, up to the template's (times the size slider), at which the text fits its sign;
+   then the block is narrowed to its longest line so it sits centred while the lines stay left aligned */
+function fitPage(pageEl, d) {
+  const T = TEMPLATES[d.template]; const res = [];
+  pageEl.querySelectorAll(".sg-slot").forEach((slot, i) => {
+    const sl = T.slots[i], box = slot.querySelector(".sg-in"), t = slot.querySelector(".sg-t"), s = slot.querySelector(".sg-s");
+    const wrapAt = k => Math.min(sl.w, sl.wrap / Math.max(k, 0.01));
+    const fits = () => box.offsetHeight <= sl.h + 0.5 && t.scrollWidth <= box.clientWidth + 0.5 && (!s || s.scrollWidth <= box.clientWidth + 0.5);
+    const apply = k => { box.style.width = wrapAt(k) + "px"; t.style.fontSize = (T.t * k) + "px"; if (s) { s.style.fontSize = (T.s * Math.max(k, 0.55)) + "px"; s.style.marginTop = (T.gap * k) + "px"; } };
+    let k = d.scale; apply(k);
+    if (!fits()) { let lo = 0.08, hi = k; for (let n = 0; n < 16; n++) { const mid = (lo + hi) / 2; apply(mid); if (fits()) lo = mid; else hi = mid; } k = lo; apply(k); }
+    // narrow to the longest line
+    const left = box.getBoundingClientRect().left, sc = box.getBoundingClientRect().width / box.offsetWidth || 1; let right = -Infinity;
+    const range = document.createRange();
+    box.querySelectorAll(".sg-t, .sg-s").forEach(el => { range.selectNodeContents(el); for (const r of range.getClientRects()) right = Math.max(right, r.right); });
+    if (Number.isFinite(right) && right > left) box.style.width = Math.ceil((right - left) / sc + 1) + "px";
+    res.push(k);
+  });
+  return res;
+}
+function renderPreview() {
+  const host = $("#pvHost");
+  if (!S.sign) { host.innerHTML = ""; return; }
+  const T = TEMPLATES[S.sign.template];
+  host.innerHTML = `<div class="pv-wrap"><div class="pv-scale">${pageHTML(S.sign, false)}</div></div>`;
+  S.fit = fitPage(host.querySelector(".sg-page"), S.sign);
+  const avail = Math.max(240, $("#pv").clientWidth - 32), k = Math.min(1, avail / T.W);
+  const sc = host.querySelector(".pv-scale"); sc.style.transform = `scale(${k})`;
+  const wrap = host.querySelector(".pv-wrap"); wrap.style.width = T.W * k + "px"; wrap.style.height = T.H * k + "px";
+  $("#pvInfo").textContent = `${T.name} · ${T.size}${T.cut ? " · cut on the dashed lines" : ""}`;
+  const minK = Math.min(...S.fit), shrunk = minK < S.sign.scale - 0.005;
+  $("#pvFit").textContent = shrunk ? `Text shrunk to ${Math.round(minK * 100)}% to fit` : "";
+}
+let pvT = 0; const schedulePreview = () => { clearTimeout(pvT); pvT = setTimeout(renderPreview, 80); };
+window.addEventListener("resize", schedulePreview);
+
+/* ---------- editor ---------- */
+function field(k, label, val, multi) {
+  return `<div class="fld"><label for="f_${k.replace(/\./g, "_")}">${label}</label>${multi
+    ? `<textarea id="f_${k.replace(/\./g, "_")}" data-k="${k}" rows="${k.endsWith(".sub") ? 2 : 3}">\n${esc(val)}</textarea>`
+    : `<input type="text" id="f_${k.replace(/\./g, "_")}" data-k="${k}" value="${esc(val)}">`}</div>`;
+}
+function renderSel() {
+  const ids = [...S.docs.keys()].sort((a, b) => (S.docs.get(b).updatedAt || 0) - (S.docs.get(a).updatedAt || 0));
+  $("#signSel").innerHTML = ids.length ? ids.map(id => `<option value="${id}"${id === S.id ? " selected" : ""}>${esc(S.docs.get(id).name || "Untitled sign")}</option>`).join("") : `<option value="">No signs yet</option>`;
+}
+function renderEditor() {
+  if (!S.loaded) return;
+  if (!S.sign) {
+    ed.innerHTML = `<div class="card"><h2>No signs yet</h2><p class="hint">Start a sign from one of the templates.</p>${tplPicker(null)}</div>`;
+    return;
+  }
+  const d = S.sign, T = TEMPLATES[d.template];
+  let text = "";
+  if (T.slots.length === 1) text = field("items.0.title", "Title", d.items[0].title, true) + field("items.0.sub", "Sub head", d.items[0].sub, true);
+  else {
+    text = `<label class="chk"><input type="checkbox" id="same" ${d.same ? "checked" : ""}> Same text on all four signs</label>`;
+    if (d.same) text += field("items.0.title", "Title", d.items[0].title, true) + field("items.0.sub", "Sub head", d.items[0].sub, true);
+    else text += [0, 1, 2, 3].map(i => `<div class="quad"><b>${["Top left", "Top right", "Bottom left", "Bottom right"][i]}</b>${field(`items.${i}.title`, "Title", d.items[i].title, true)}${field(`items.${i}.sub`, "Sub head", d.items[i].sub, true)}</div>`).join("");
+  }
+  ed.innerHTML = `
+    <div class="card"><h2>Sign text</h2>${text}<p class="hint">Press Return for a new line in the title or the sub head. Text that does not fit shrinks automatically.</p></div>
+    <div class="card"><h2>Size</h2>
+      <div class="fld"><label for="scale">Largest text size</label><div class="rng"><input type="range" id="scale" min="0.3" max="1" step="0.01" value="${d.scale}"><output>${Math.round(d.scale * 100)}%</output></div></div>
+      <p class="hint">100% is the size in the template. Lower it for a quieter sign.</p></div>
+    <div class="card"><h2>Template</h2>${tplPicker(d.template)}</div>
+    <div class="card"><h2>This sign</h2>${field("name", "Name in the list", d.name, false)}
+      <div class="row"><button class="btn" type="button" id="dupBtn">Duplicate</button><button class="btn danger" type="button" id="delBtn">Delete sign</button></div></div>`;
+  ed.querySelectorAll("textarea").forEach(grow);
+}
+function tplPicker(cur) {
+  const mini = k => { const T = TEMPLATES[k]; const w = T.W > T.H ? 56 : 40, h = Math.round(w * T.H / T.W);
+    const cells = k === "quad" ? "grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;padding:3px" : "padding:6px";
+    return `<span class="mini" style="width:${w}px;height:${h}px;${cells}">${(k === "quad" ? [1, 2, 3, 4] : [1]).map(() => `<span style="background:#1A1A1A;opacity:.18;border-radius:1px;height:${k === "quad" ? 8 : 14}px;width:70%"></span>`).join("")}</span>`; };
+  return `<div class="tpls">${Object.entries(TEMPLATES).map(([k, T]) => `<button type="button" class="tpl" data-tpl="${k}" aria-pressed="${k === cur}">${mini(k)}<span>${T.name}</span><small>${T.size}</small></button>`).join("")}</div>`;
+}
+
+/* text boxes grow with their lines, so every return stays visible */
+function grow(t) { t.style.height = "auto"; t.style.height = (t.scrollHeight + 2) + "px"; }
+function setPath(o, path, v) { const ks = path.split("."); for (let i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
+ed.addEventListener("input", e => {
+  const t = e.target; if (!S.sign) return;
+  if (t.id === "scale") { S.sign.scale = +t.value; t.nextElementSibling.textContent = Math.round(t.value * 100) + "%"; changed(); return; }
+  if (!t.dataset.k) return;
+  if (t.tagName === "TEXTAREA") grow(t);
+  setPath(S.sign, t.dataset.k, t.value);
+  if (t.dataset.k === "name") renderSelSoon();
+  changed();
+});
+ed.addEventListener("change", e => { if (e.target.id === "same" && S.sign) { S.sign.same = e.target.checked; if (!S.sign.same) for (let i = 1; i < 4; i++) S.sign.items[i] = clone(S.sign.items[0]); renderEditor(); changed(); } });
+ed.addEventListener("click", e => {
+  const tp = e.target.closest(".tpl");
+  if (tp) { if (!S.sign) { createSign(tp.dataset.tpl); return; } S.sign.template = tp.dataset.tpl; renderEditor(); changed(); return; }
+  if (e.target.closest("#dupBtn")) { const c = clone(S.sign); c.name = c.name + " copy"; createFrom(c); return; }
+  const del = e.target.closest("#delBtn");
+  if (del) {
+    if (!del.classList.contains("armed")) { del.classList.add("armed"); del.textContent = "Click again to delete"; setTimeout(() => { if (del.isConnected) { del.classList.remove("armed"); del.textContent = "Delete sign"; } }, 3500); return; }
+    deleteSign();
+  }
+});
+let selT = 0; const renderSelSoon = () => { clearTimeout(selT); selT = setTimeout(renderSel, 300); };
+
+/* ---------- saving ---------- */
+function setStatus(kind, text) { const el = $("#status"); el.className = "status " + kind; el.querySelector("span").textContent = text; }
+let saveT = 0;
+function changed() { S.dirty = true; setStatus("busy", "Saving…"); schedulePreview(); clearTimeout(saveT); saveT = setTimeout(save, 700); }
+async function save() {
+  if (!S.sign || !S.id) return;
+  if (S.saving) { S.again = true; return; }
+  S.saving = true; S.dirty = false;
+  const id = S.id, body = clone(S.sign); body.updatedAt = Date.now();
+  try { await S.db.collection("signs").doc(id).set(body); S.docs.set(id, body); setStatus("ok", "Saved " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })); }
+  catch (e) { setStatus("err", e && e.code === "invalid_argument" ? "Your access cannot save signs" : "Not saved. Retrying…"); S.dirty = true; setTimeout(save, 4000); }
+  S.saving = false;
+  if (S.again) { S.again = false; save(); }
+}
+const uid = () => "sign-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function createSign(tpl) { createFrom(newSign(tpl)); }
+function createFrom(d) {
+  const id = uid(); d = normalize(d); d.updatedAt = Date.now();
+  S.docs.set(id, d); S.id = id; S.sign = clone(d); remember(); renderSel(); renderEditor(); renderPreview(); changed();
+}
+async function deleteSign() {
+  const id = S.id; if (!id) return;
+  try { await S.db.collection("signs").doc(id).delete(); } catch (e) { toast("Could not delete. Try again."); return; }
+  S.docs.delete(id); S.id = [...S.docs.keys()][0] || null; S.sign = S.id ? normalize(clone(S.docs.get(S.id))) : null;
+  remember(); renderSel(); renderEditor(); renderPreview(); toast("Sign deleted.");
+}
+function remember() { try { localStorage.setItem("sgn.last", S.id || ""); } catch (e) {} }
+$("#signSel").addEventListener("change", e => { if (!e.target.value) return; if (S.dirty) save(); S.id = e.target.value; S.sign = normalize(clone(S.docs.get(S.id))); remember(); renderEditor(); renderPreview(); });
+
+/* New sign: a small menu of templates */
+$("#newBtn").addEventListener("click", () => {
+  if (S.dirty) save();
+  S.id = null; S.sign = null;
+  ed.innerHTML = `<div class="card"><h2>New sign</h2><p class="hint">Pick a template. You can change it later.</p>${tplPicker(null)}</div>`;
+  renderPreview(); renderSel();
+});
+
+function onSnapshot(snap) {
+  const focused = ed.contains(document.activeElement);
+  const fresh = new Map(); snap.docs.forEach(d => fresh.set(d.id, normalize(d.data())));
+  for (const [id, d] of fresh) { const mine = S.docs.get(id); if (!mine || (d.updatedAt || 0) >= (mine.updatedAt || 0)) S.docs.set(id, d); }
+  for (const id of [...S.docs.keys()]) if (!fresh.has(id) && !(id === S.id && S.dirty)) S.docs.delete(id);
+  const first = !S.loaded; S.loaded = true;
+  if (first) {
+    let pref = ""; try { pref = localStorage.getItem("sgn.last") || ""; } catch (e) {}
+    S.id = S.docs.has(pref) ? pref : [...S.docs.keys()][0] || null;
+    S.sign = S.id ? normalize(clone(S.docs.get(S.id))) : null;
+    setStatus("ok", S.docs.size ? "Up to date" : "No signs yet");
+    renderSel(); renderEditor(); renderPreview(); return;
+  }
+  if (S.id && !S.docs.has(S.id) && !S.dirty) { S.id = [...S.docs.keys()][0] || null; S.sign = S.id ? normalize(clone(S.docs.get(S.id))) : null; renderEditor(); renderPreview(); }
+  else if (S.id && !S.dirty && !focused) { const d = S.docs.get(S.id); if (JSON.stringify(d) !== JSON.stringify(S.sign)) { S.sign = normalize(clone(d)); renderEditor(); renderPreview(); } }
+  renderSel();
+}
+
+/* ---------- PDF: real fonts, every character placed where the browser set it ---------- */
+const FONT_BYTES = {};
+async function loadFonts() {
+  await Promise.all(FONT_FILES.map(async ([fam, key, w, url]) => {
+    const buf = await (await fetch(url)).arrayBuffer(); FONT_BYTES[key] = new Uint8Array(buf);
+    const ff = new FontFace(fam, buf.slice(0), { weight: w }); document.fonts.add(ff); await ff.load();
+  }));
+}
+const fontKey = cs => /Nantes/.test(cs.fontFamily) ? "nantes" : /Whitney/.test(cs.fontFamily) ? "whit" : null;
+async function exportPDF() {
+  if (!S.sign) { toast("Pick or create a sign first."); return; }
+  if (!window.PDFLib || !window.fontkit) { toast("The PDF tools didn’t load. Reload the page and try again."); return; }
+  toast("Building PDF…", 30000);
+  await document.fonts.ready;
+  const d = S.sign, T = TEMPLATES[d.template], host = $("#exporthost");
+  host.innerHTML = pageHTML(d, true); const pe = host.firstElementChild; fitPage(pe, d);
+  const ratio = {};
+  for (const [fam, key, w] of FONT_FILES) {
+    const m = document.createElement("div");
+    m.style.cssText = `position:absolute;left:0;top:0;font:${w} 100px/1 "${fam}";white-space:nowrap`;
+    m.innerHTML = `<span>Hxg</span><span style="display:inline-block;width:0;height:0;vertical-align:baseline"></span>`;
+    host.appendChild(m); const r = document.createRange(); r.selectNodeContents(m.firstChild); const rr = r.getBoundingClientRect();
+    ratio[key] = (m.lastChild.getBoundingClientRect().bottom - rr.top) / rr.height; m.remove();
+  }
+  const { PDFDocument, rgb } = PDFLib;
+  const pdf = await PDFDocument.create(); pdf.registerFontkit(fontkit);
+  pdf.setTitle(d.name); pdf.setCreator("Basic Signage Studio");
+  const fonts = {}; for (const [, key] of FONT_FILES) fonts[key] = await pdf.embedFont(FONT_BYTES[key], { subset: false });
+  const [PW, PH] = T.pdf, K = PW / T.W;
+  const page = pdf.addPage([PW, PH]);
+  const P = pe.getBoundingClientRect(); const X = v => (v - P.left) * K, Y = v => PH - (v - P.top) * K;
+  if (T.cut) {   // short cut marks at the edges of the centre lines
+    const g = rgb(.6, .6, .6), L = 14;
+    page.drawLine({ start: { x: PW / 2, y: PH }, end: { x: PW / 2, y: PH - L }, thickness: .5, color: g });
+    page.drawLine({ start: { x: PW / 2, y: 0 }, end: { x: PW / 2, y: L }, thickness: .5, color: g });
+    page.drawLine({ start: { x: 0, y: PH / 2 }, end: { x: L, y: PH / 2 }, thickness: .5, color: g });
+    page.drawLine({ start: { x: PW, y: PH / 2 }, end: { x: PW - L, y: PH / 2 }, thickness: .5, color: g });
+  }
+  const walker = document.createTreeWalker(pe, NodeFilter.SHOW_TEXT), range = document.createRange(); let node;
+  while ((node = walker.nextNode())) {
+    const txt = node.nodeValue; if (!txt.trim()) continue;
+    const cs = getComputedStyle(node.parentElement), key = fontKey(cs); if (!key) continue;
+    const size = parseFloat(cs.fontSize) * K, m = (cs.color.match(/[\d.]+/g) || [0, 0, 0]).map(Number), color = rgb(m[0] / 255, m[1] / 255, m[2] / 255);
+    let off = 0;
+    for (const ch of [...txt]) {
+      const len = ch.length;
+      if (ch.trim()) {
+        range.setStart(node, off); range.setEnd(node, off + len);
+        const r = range.getClientRects()[0];
+        if (r && r.width) { try { page.drawText(ch, { x: X(r.left), y: Y(r.top + ratio[key] * r.height), size, font: fonts[key], color }); } catch (e) {} }
+      }
+      off += len;
+    }
+  }
+  host.innerHTML = "";
+  const bytes = await pdf.save();
+  const name = (d.name || "Sign").replace(/[\\/:*?"<>|]+/g, " ").trim() + ".pdf";
+  try { const r = await S.downloads.save({ filename: name, data: new Blob([bytes], { type: "application/pdf" }) }); toast(r && r.status === "declined" ? "Download cancelled." : "Saved " + name); }
+  catch (e) { toast("The PDF could not be saved."); }
+}
+$("#pdfBtn").addEventListener("click", exportPDF);
+
+let toastT = 0;
+function toast(msg, ms = 3200) { const el = $("#toast"); el.textContent = msg; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, ms); }
+function localDownloads() {
+  return { async save({ filename, data }) {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(data); a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    return { status: "saved" };
+  } };
+}
+
+async function boot() {
+  const who = await PORTAL.gate("signage");
+  PORTAL.bar(who);
+  try { await loadFonts(); } catch (e) { toast("The sign fonts didn’t load. Reload the page."); }
+  await document.fonts.ready;
+  const claude = window.claude;
+  S.downloads = (claude && claude.use && await claude.use("downloads")) || localDownloads();
+  S.db = PORTAL.db("signage");
+  S.db.collection("signs").onSnapshot(onSnapshot, () => setStatus("err", "Connection lost. Reload the page."));
+}
+boot();
+})();
+</script>
+</body>
+</html>

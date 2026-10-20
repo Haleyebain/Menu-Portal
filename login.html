@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="portal-build" content="1015a">
+<title>Sign in · Menu Portal · b1015a</title>
+<link rel="stylesheet" href="portal.css">
+</head>
+<body>
+<main class="door">
+  <form class="card" id="form" autocomplete="on" novalidate>
+    <div class="eyebrow">Menu Portal</div>
+    <h1>Sign in.</h1>
+    <label for="email">Work email</label>
+    <input type="email" id="email" name="email" placeholder="you@aspensnowmass.com" autocomplete="email" autocapitalize="off" spellcheck="false">
+    <label for="key">Access code</label>
+    <input type="text" id="key" name="key" placeholder="XXXXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="40">
+    <div class="hint">Issued by F&amp;B leadership. Case does not matter.</div>
+    <button class="btn" type="submit" id="go">Sign in</button>
+    <div class="err" id="err" role="alert" hidden></div>
+    <div class="ok" id="ok" hidden></div>
+    <div class="foot">Your code decides which tools and which restaurants you see.</div>
+  </form>
+</main>
+<script src="portal.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var email = $("email"), key = $("key"), go = $("go"), err = $("err"), ok = $("ok");
+  function next() {
+    var m = /[?&]next=([^&#]*)/.exec(location.search);
+    var t = m ? decodeURIComponent(m[1]) : "index.html";
+    return /^[A-Za-z0-9._-]+\.html$/.test(t) ? t : "index.html";   /* no open redirect */
+  }
+  function fail(msg, field) {
+    err.textContent = msg; err.hidden = false;
+    (field || key).classList.add("bad"); (field || key).focus();
+    go.disabled = false; go.textContent = "Sign in";
+  }
+  var s = PORTAL.session();
+  if (s.email) email.value = s.email;
+  if (s.key && s.ent) {
+    ok.innerHTML = "Already signed in" + (s.label ? " as <b></b>" : "") + '. <a href="' + next() + '">Continue</a> · <a href="#" id="so">Sign out</a>';
+    if (s.label) ok.querySelector("b").textContent = s.label;
+    ok.hidden = false;
+    $("so").addEventListener("click", function (e) { e.preventDefault(); PORTAL.signOut(); });
+  }
+  $("form").addEventListener("submit", function (e) {
+    e.preventDefault(); err.hidden = true; email.classList.remove("bad"); key.classList.remove("bad");
+    var em = email.value.trim(), k = key.value.trim().toUpperCase();
+    if (!em || em.indexOf("@") < 0) return fail("Enter your work email.", email);
+    if (!k) return fail("Enter your access code.");
+    go.disabled = true; go.textContent = "Checking access…";
+    PORTAL.check(k).then(function (ent) {
+      if (!ent) return fail("Access code not recognized.");
+      if (!ent.buckets || !ent.buckets.length) return fail("This code is valid but has no tools switched on yet.");
+      PORTAL.remember(em, k, ent);
+      go.textContent = "Opening…";
+      location.replace(next());
+    }, function (e2) { fail((e2 && e2.message) || "Access could not be checked. Try again in a minute."); });
+  });
+})();
+</script>
+</body>
+</html>
