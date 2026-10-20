@@ -10,6 +10,10 @@
 <link rel="preload" href="assets/fonts/whitney-book.otf" as="fetch" crossorigin>
 <link rel="preload" href="assets/fonts/whitney-bold.otf" as="fetch" crossorigin>
 <style>html,body{margin:0}img{max-width:100%}</style>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
 </head>
 <body>
 <title>Wine Lists · Menu Portal · b1015a</title>
@@ -250,7 +254,7 @@ textarea.auto{resize:none;overflow:hidden}
 .ai-t{flex:0 1 auto;min-width:0}
 .ai-n{font-weight:700}
 .ai-d{font-style:italic;font-weight:400}
-.ai-lead{flex:1 1 24px;min-width:24px;height:.7px;background:var(--wl-ink);margin:0 7px 4.5px 4px}
+.ai-lead{flex:1 1 24px;min-width:24px;height:.7px;background:transparent;margin:0 7px 4.5px 4px}   /* open space, no line: the price column still lines up on the right */
 .lay-glass .ai-p{width:var(--pcol)}
 .ai-p{flex:none;min-width:44px;font:italic 400 12px/17.3px "WL OldStandard",serif;white-space:nowrap}
 /* The Cabin theme: open page, wide-tracked Znikomit heads, Inter rows with a price column */
@@ -328,7 +332,9 @@ textarea.auto{resize:none;overflow:hidden}
 .th-sams.fmt-half .wl-foot img{left:129px;width:150px}
 .th-sams.fmt-half .wl-foot .r{top:51px;width:96px}
 .th-sams.fmt-half .wl-foot .r.l{left:18px} .th-sams.fmt-half .wl-foot .r.rr{left:294px}
-.th-alpin.fmt-half .wl-rule{left:121px}
+.th-alpin.fmt-half .wl-rule{left:121px;top:138px}
+.th-alpin.fmt-half .wl-title{top:83px}
+.th-alpin.fmt-half .wl-sub{top:159px}
 .th-alpin.fmt-half .ai,.th-alpin.fmt-half .ai-p{font-size:11px;line-height:16px}
 .th-alpin.fmt-half .ai-lead{min-width:14px;flex-basis:14px;margin:0 5px 4px 3px}
 .th-alpin.fmt-half .wl-foot img{left:104px;top:985px;width:200px}
@@ -477,7 +483,7 @@ const THEMES = {
   alpin: { label: "Alpin Room (framed page, leader lines)", geo: { glass: ALPIN, bottle: ALPIN, simple: { ...ALPIN, cols: 2, gap: 30 }, cocktail: { ...ALPIN, left: 158, width: 500, itemGap: 16 } }, accent: "#142F39", ink: "#1E2A33", logo: "builtin:alpin" },
 };
 const themeOf = () => (THEMES[S.menu?.theme] ? S.menu.theme : "sams");
-const HALF = { sams: { left: 30, width: 348 }, alpin: { left: 36, width: 336 }, cabin: { left: 30, width: 348, bottom: 930 }, c9: { left: 30, width: 348 } };
+const HALF = { sams: { left: 30, width: 348 }, alpin: { left: 36, width: 336, top: 233, topCont: 91 }, cabin: { left: 30, width: 348, bottom: 930 }, c9: { left: 30, width: 348 } };
 const geoFor = list => {
   const g = THEMES[themeOf()].geo[list.layout] || GEO[list.layout];
   return list.format === "half" ? { ...g, ...HALF[themeOf()], cols: 1, gap: 0 } : g;
@@ -676,7 +682,7 @@ function blockHTML(b, list) {
       if (themeOf() === "alpin") {
         const name = [L === "bottle" ? it.bin : "", it.producer, it.wine].map(trimSp).filter(x => x.trim()).join(" ");
         const org = L === "simple" ? "" : originLine(it);
-        return `<div class="ai" data-id="${it.id}"><span class="ai-t"><span class="ai-n">${br(name)}</span>${org ? ` <span class="ai-d">${br(org)}</span>` : ""}</span><span class="ai-lead" data-pdf-rule></span><span class="ai-p">${priceHTML}</span></div>`;
+        return `<div class="ai" data-id="${it.id}"><span class="ai-t"><span class="ai-n">${br(name)}</span>${org ? ` <span class="ai-d">${br(org)}</span>` : ""}</span><span class="ai-lead"></span><span class="ai-p">${priceHTML}</span></div>`;
       }
       if (L === "simple") return `<div class="b-item" data-id="${it.id}"><div class="it-l1">${br(it.producer)}</div><div class="it-pr">${priceHTML}</div></div>`;
       const bin = L === "bottle" && it.bin ? `${esc(it.bin)} ` : "";
@@ -811,7 +817,7 @@ function pageHTML(list, cols, pg, pi = 0) {
   if (themeOf() === "alpin") {
     const head = pi === 0 ? `<div class="wl-title">${br(up(list.title))}</div><div class="wl-rule" data-pdf-rule></div>${list.subtitle ? `<div class="wl-sub">${br(up(list.subtitle))}</div>` : ""}` : "";
     const fr = (half
-      ? [[14, 72, W - 28, 1.3], [14, 72, 1.3, 921.7], [W - 15.3, 72, 1.3, 921.7], [14, 992.4, 78, 1.3], [W - 92, 992.4, 78, 1.3]]
+      ? [[14, 24, W - 28, 1.3], [14, 24, 1.3, 969.7], [W - 15.3, 24, 1.3, 969.7], [14, 992.4, 78, 1.3], [W - 92, 992.4, 78, 1.3]]   // half panel: frame starts higher, no dead space above it
       : [[28, 72, 760, 1.3], [28, 72, 1.3, 921.7], [786.7, 72, 1.3, 921.7], [28, 992.4, 189, 1.3], [601, 992.4, 187, 1.3]])
       .map(([l, t, w, h]) => `<span data-pdf-rule style="left:${l}px;top:${t}px;width:${w}px;height:${h}px"></span>`).join("");
     return `<div class="wl-page th-alpin lay-${list.layout}${fmt}" style="${pageVars()}"><div class="wl-frame">${fr}</div>${head}${colsHTML}<div class="wl-foot">${logoHTML()}</div></div>`;
