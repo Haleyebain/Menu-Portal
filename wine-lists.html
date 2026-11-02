@@ -147,10 +147,10 @@ body.resizing .preview,body.resizing .editor{pointer-events:none}
 .rhead span{padding-left:8px;text-align:left;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rhead .prices span{padding-left:8px}
 .rt{justify-content:flex-end}
-.L-bottle .row,.L-bottle .rhead{grid-template-columns:46px 56px minmax(110px,1.1fr) minmax(120px,1.4fr) minmax(100px,1fr) 58px 52px 70px 86px}
-.L-glass .row,.L-glass .rhead{grid-template-columns:46px minmax(110px,1fr) minmax(110px,1.1fr) minmax(100px,1fr) 58px minmax(170px,1.2fr) 86px}
-.L-simple .row,.L-simple .rhead{grid-template-columns:46px minmax(160px,1fr) 80px 58px}
-.L-cocktail .row,.L-cocktail .rhead{grid-template-columns:46px minmax(130px,.8fr) minmax(180px,1.6fr) 70px 58px}
+.L-bottle .row,.L-bottle .rhead{grid-template-columns:62px 56px minmax(110px,1.1fr) minmax(120px,1.4fr) minmax(100px,1fr) 58px 52px 70px 86px}
+.L-glass .row,.L-glass .rhead{grid-template-columns:62px minmax(110px,1fr) minmax(110px,1.1fr) minmax(100px,1fr) 58px minmax(170px,1.2fr) 86px}
+.L-simple .row,.L-simple .rhead{grid-template-columns:62px minmax(160px,1fr) 80px 58px}
+.L-cocktail .row,.L-cocktail .rhead{grid-template-columns:62px minmax(130px,.8fr) minmax(180px,1.6fr) 70px 58px}
 .prices{display:grid;grid-template-columns:repeat(var(--np),1fr);gap:4px}
 .row textarea{resize:none;overflow:hidden;line-height:18px;display:block;font:inherit}
 .row input,.row textarea{width:100%;min-width:0;border:1px solid var(--line-2);background:var(--panel);border-radius:5px;padding:5px 7px;min-height:30px}
@@ -165,6 +165,13 @@ body.resizing .preview,body.resizing .editor{pointer-events:none}
 .lead{display:flex;align-items:center;gap:2px;min-height:30px}
 input.sel,.row input.sel{width:16px;height:16px;min-height:0;padding:0;margin:0 2px;border:0;box-shadow:none;accent-color:var(--gold-deep);cursor:pointer;flex:none}
 .mv{display:grid;gap:0}
+.grip{width:14px;height:30px;display:grid;place-items:center;color:var(--muted);cursor:grab;flex:none;opacity:.6}
+.grip:hover{opacity:1;color:var(--ink)}
+.grip svg{width:12px;height:14px}
+.row.dragging{opacity:.4}
+.row.drop-before{box-shadow:inset 0 2px 0 var(--gold-deep)}
+.row.drop-after{box-shadow:inset 0 -2px 0 var(--gold-deep)}
+.grp.drop-in .rows{outline:2px dashed var(--gold-deep);outline-offset:2px;border-radius:6px}
 textarea.auto{resize:none;overflow:hidden}
 .sec-h textarea.name,.grp-h textarea.gname{line-height:1.3}
 .selbar{position:sticky;bottom:0;z-index:6;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 -60px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--panel);font-size:13px;box-shadow:0 -6px 20px rgba(0,0,0,.18)}
@@ -179,10 +186,10 @@ textarea.auto{resize:none;overflow:hidden}
 .empty-g{color:var(--muted);font-size:12px;padding:6px 0}
 @container (max-width: 760px){
   .L-bottle .rhead,.L-glass .rhead{display:none}
-  .L-bottle .row{grid-template-columns:46px 56px 1fr 1fr;grid-template-areas:"mv bin prod prod" "mv wine wine wine" "mv org org org" "mv vin fmt price" "mv rt rt rt";padding:8px 0;border-bottom:1px solid var(--line-2)}
+  .L-bottle .row{grid-template-columns:62px 56px 1fr 1fr;grid-template-areas:"mv bin prod prod" "mv wine wine wine" "mv org org org" "mv vin fmt price" "mv rt rt rt";padding:8px 0;border-bottom:1px solid var(--line-2)}
   .L-cocktail .rhead{display:none}
-  .L-cocktail .row{grid-template-columns:46px 1fr 80px;grid-template-areas:"mv prod price" "mv wine wine" "mv rt rt";padding:8px 0;border-bottom:1px solid var(--line-2)}
-  .L-glass .row{grid-template-columns:46px 1fr 1fr;grid-template-areas:"mv prod wine" "mv org vin" "mv price price" "mv rt rt";padding:8px 0;border-bottom:1px solid var(--line-2)}
+  .L-cocktail .row{grid-template-columns:62px 1fr 80px;grid-template-areas:"mv prod price" "mv wine wine" "mv rt rt";padding:8px 0;border-bottom:1px solid var(--line-2)}
+  .L-glass .row{grid-template-columns:62px 1fr 1fr;grid-template-areas:"mv prod wine" "mv org vin" "mv price price" "mv rt rt";padding:8px 0;border-bottom:1px solid var(--line-2)}
   .row .lead{grid-area:mv;align-self:start} .row .f-bin{grid-area:bin} .row .f-producer{grid-area:prod} .row .f-wine{grid-area:wine}
   .row .f-origin{grid-area:org} .row .f-vintage{grid-area:vin} .row .f-format{grid-area:fmt} .row .f-price{grid-area:price} .row .rt{grid-area:rt;justify-content:flex-end}
 }
@@ -234,7 +241,7 @@ textarea.auto{resize:none;overflow:hidden}
 .it-l1 .wn{font-size:11.2px}
 .it-l2{font-size:11px;line-height:13px}
 .it-org{font:italic 500 9.6px/13px "WL Gotham",sans-serif;letter-spacing:.06em}
-.it-pr{font:300 10.3px/14px "WL Gotham",sans-serif;letter-spacing:.09em;white-space:nowrap}
+.it-pr{font:300 10.3px/14px "WL Gotham",sans-serif;letter-spacing:.09em;white-space:nowrap;text-align:right;margin-right:-.09em}
 .lay-simple .it-l1{font:300 11px/15px "WL Gotham",sans-serif;letter-spacing:.09em}
 .lay-simple .it-pr{line-height:15px}
 /* Alpin Room theme: framed page, Lakers heads, Old Standard rows with leader lines */
@@ -250,13 +257,14 @@ textarea.auto{resize:none;overflow:hidden}
 .th-alpin .b-grp{font:700 13.5px/1.2 "WL OldStandard",serif;letter-spacing:0}
 .th-alpin .b-note{font:italic 400 11px/1.3 "WL OldStandard",serif;letter-spacing:0}
 .th-alpin .b-div{background:var(--wl-ink);opacity:.4}
-.ai{display:flex;align-items:flex-end;font:400 12px/17.3px "WL OldStandard",serif;color:var(--wl-ink)}
+.ai{display:flex;align-items:flex-start;font:400 12px/17.3px "WL OldStandard",serif;color:var(--wl-ink)}
 .ai-t{flex:0 1 auto;min-width:0}
 .ai-n{font-weight:700}
 .ai-d{font-style:italic;font-weight:400}
 .ai-lead{flex:1 1 24px;min-width:24px;height:.7px;background:transparent;margin:0 7px 4.5px 4px}   /* open space, no line: the price column still lines up on the right */
 .lay-glass .ai-p{width:var(--pcol)}
-.ai-p{flex:none;min-width:44px;font:italic 400 12px/17.3px "WL OldStandard",serif;white-space:nowrap}
+.ai-p{flex:none;min-width:44px;font:italic 400 12px/17.3px "WL OldStandard",serif;white-space:nowrap;text-align:right}
+.lay-glass .ai-p{text-align:left}
 /* The Cabin theme: open page, wide-tracked Znikomit heads, Inter rows with a price column */
 .th-cabin .wl-title{top:67px;font:400 56px/1 "WL Znikomit",serif;color:var(--wl-accent);letter-spacing:.155em;padding-left:.155em}
 .th-cabin .wl-sub{top:134px;font:400 22px/1 "WL Znikomit",serif;letter-spacing:.14em;padding-left:.14em;color:var(--wl-accent)}
@@ -274,7 +282,7 @@ textarea.auto{resize:none;overflow:hidden}
 .ci{display:grid;grid-template-columns:1fr 52px;gap:8px;align-items:start;font:300 9.5px/15.7px "WL Inter",sans-serif;color:var(--wl-ink)}
 .ci-n{font-weight:800}
 .th-cabin.lay-simple .ci{grid-template-columns:1fr 40px}
-.ci-p{white-space:nowrap}
+.ci-p{white-space:nowrap;text-align:right}
 /* Cloud Nine theme: brush frame broken by a Bebas title, Franklin Gothic rows with dot leaders */
 .th-c9{--pcol:34px}
 .th-c9.lay-glass{--pcol:22px}
@@ -292,12 +300,13 @@ textarea.auto{resize:none;overflow:hidden}
 .th-c9 .b-grp{font:500 9px/1.2 "WL Franklin",sans-serif;letter-spacing:.06em;color:var(--wl-ink)}
 .th-c9 .b-note{font:400 10px/1.3 "WL Franklin",sans-serif;letter-spacing:0;margin-top:4px}
 .th-c9 .b-div{background:transparent}
-.c9i{display:flex;align-items:flex-end;font:400 11.3px/19px "WL Franklin",sans-serif;color:var(--wl-ink)}
+.c9i{display:flex;align-items:flex-start;font:400 11.3px/19px "WL Franklin",sans-serif;color:var(--wl-ink)}
 .c9-t{flex:0 1 auto;min-width:0}
 .c9-n{font-weight:500;letter-spacing:.17em}
 .c9-d{font-size:10.6px}
-.c9-dots{flex:1 1 20px;min-width:20px;height:2px;margin:0 9px 5px 4px;color:var(--wl-ink);background:radial-gradient(circle,currentColor .7px,transparent 1px) right center/6.4px 2px repeat-x}
-.c9-p{flex:none;width:var(--pcol);white-space:nowrap}
+.c9-dots{flex:1 1 20px;min-width:20px;height:2px;margin:12px 9px 0 4px;color:var(--wl-ink);background:radial-gradient(circle,currentColor .7px,transparent 1px) right center/6.4px 2px repeat-x}
+.c9-p{flex:none;width:var(--pcol);white-space:nowrap;text-align:right}
+.lay-glass .c9-p{text-align:left}
 .th-c9.fmt-half .c9-frame{width:408px}
 .th-c9.fmt-half .wl-title{font-size:44px}
 .th-c9.fmt-half .c9-top{gap:14px}
@@ -518,6 +527,8 @@ const ICON = {
   trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V4h6v3m-8 0 1 13h8l1-13"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>',
   sort: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 4v16m0 0-3-3m3 3 3-3M14 6h6M14 12h4M14 18h2"/></svg>',
+  page: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M12 10v6"/></svg>',
+  grip: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>',
   left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m15 6-6 6 6 6"/></svg>',
   right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m9 6 6 6-6 6"/></svg>',
@@ -638,9 +649,7 @@ function index() {
 function fmtPrice(p, list) {
   let v = String(p ?? "").trim();
   if (!v) return "";
-  v = v.replace(/^\$\s*/, "");
-  if (list.currency && /^[\d.,]+$/.test(v)) return "$" + v;
-  return v;
+  return v.replace(/\$\s*/g, "");   // prices print as plain numbers, never with $
 }
 const trimSp = x => String(x || "").replace(/^[ \t]+|[ \t]+$/g, "");   // spaces only, never hard returns
 function originLine(it) { return [it.origin, it.vintage, it.format].map(trimSp).filter(x => x.trim()).join(" "); }
@@ -702,14 +711,14 @@ function listBlocks(list) {
     const groups = s.groups.map(g => ({ g, items: g.items.filter(it => !it.hidden && (it.producer || it.wine)) }));
     if (!groups.some(x => x.items.length)) continue;
     out.push({ type: "sec", text: s.name, note: s.note, sec: s, showLabels: first, newPage: s.newPage, newColumn: s.newColumn,
-               cont: { type: "sec", text: s.contName || `${s.name} Continued`, sec: s, showLabels: false } });
+               cont: { type: "sec", text: s.name, sec: s, showLabels: false } });   // a continued section repeats its current name
     first = false;
     let gi = 0;
     for (const { g, items } of groups) {
       if (!items.length) continue;
       let gb = null;
-      if (g.name) { gb = { type: "grp", text: g.name, sec: s, grp: g, cont: { type: "grp", text: g.contName || `${g.name} Cont`, sec: s, grp: g } }; out.push(gb); }
-      else if (gi > 0) out.push({ type: "div", sec: s, grp: g });
+      if (g.name) { gb = { type: "grp", text: g.name, sec: s, grp: g, newPage: g.newPage, cont: { type: "grp", text: g.name, sec: s, grp: g } }; out.push(gb); }
+      else if (gi > 0) out.push({ type: "div", sec: s, grp: g, newPage: g.newPage });
       for (const it of items) out.push({ type: "item", item: it, sec: s, grp: g });
       gi++;
     }
@@ -759,6 +768,12 @@ function paginate(list) {
     const b = blocks[i];
     if (b.type === "sec" && cur().length) {
       if (b.newPage) nextCol(true); else if (b.newColumn) nextCol(false);
+    }
+    if ((b.type === "grp" || b.type === "div") && b.newPage && cur().length && cur()[cur().length - 1].b.type !== "sec") {
+      nextCol(true);
+      const secBlock = blocks.find(x => x.type === "sec" && x.sec === b.sec);
+      if (secBlock) place(secBlock.cont);
+      if (b.type === "div") continue;
     }
     // keep headers with what follows
     let need = gapBefore(b, cur().length ? cur()[cur().length - 1].b : null, geo) + b.h;
@@ -890,7 +905,7 @@ function rowHTML(it, list) {
 ${esc(it[k])}</textarea>`
     : `<input class="f-${k} ${cls}" data-f="${k}" data-i="${it.id}" value="${esc(it[k])}" placeholder="${esc(ph)}" aria-label="${esc(ph || k)}"${extra}${ro}>`;
   const prices = list.priceLabels.map((lab, pi) => `<input class="num" data-f="price" data-p="${pi}" data-i="${it.id}" value="${esc(it.prices[pi])}" placeholder="${esc(lab)}" aria-label="${esc(lab)} price" inputmode="decimal"${ro}>`).join("");
-  const mv = `<div class="lead"><input type="checkbox" class="sel" data-sel="${it.id}"${S.sel.has(it.id) ? " checked" : ""} aria-label="Select to copy"><div class="mv"><button class="ib" data-act="itemUp" data-i="${it.id}" aria-label="Move up">${ICON.up}</button><button class="ib" data-act="itemDown" data-i="${it.id}" aria-label="Move down">${ICON.down}</button></div></div>`;
+  const mv = `<div class="lead">${S.canWrite ? `<span class="grip" draggable="true" data-drag="${it.id}" title="Drag to reorder" aria-hidden="true">${ICON.grip}</span>` : ""}<input type="checkbox" class="sel" data-sel="${it.id}"${S.sel.has(it.id) ? " checked" : ""} aria-label="Select to copy"><div class="mv"><button class="ib" data-act="itemUp" data-i="${it.id}" aria-label="Move up">${ICON.up}</button><button class="ib" data-act="itemDown" data-i="${it.id}" aria-label="Move down">${ICON.down}</button></div></div>`;
   const rt = `<div class="rt">
     ${L !== "simple" && L !== "cocktail" ? `<button class="ib" data-act="wrap" data-i="${it.id}" aria-pressed="${!!it.wrap}" title="Put the wine name on its own line" aria-label="Wine name on its own line">${ICON.wrap}</button>` : ""}
     <button class="ib" data-act="hide" data-i="${it.id}" aria-pressed="${!!it.hidden}" title="${it.hidden ? "Hidden from print (86'd). Click to show" : "Hide from print (86 it)"}" aria-label="Hide from print">${it.hidden ? ICON.eyeOff : ICON.eye}</button>
@@ -938,7 +953,6 @@ ${esc(list.title)}</textarea></div>
 ${esc(list.subtitle)}</textarea></div>
       <div class="fld" style="flex:1 1 200px"><label for="lLay">Layout</label><select class="inp" id="lLay" data-lf="layout"${S.canWrite ? "" : " disabled"}>${Object.entries(LAYOUTS).map(([k, v]) => `<option value="${k}"${k === list.layout ? " selected" : ""}>${esc(v)}</option>`).join("")}</select></div>
       ${list.layout === "glass" ? `<div class="fld" style="flex:1 1 150px"><label for="lPL">Price columns</label><input class="inp" id="lPL" data-lf="priceLabels" value="${esc(list.priceLabels.join(", "))}" placeholder="6oz, 8oz, Bottle"${S.canWrite ? "" : " readonly"}></div>` : ""}
-      <label class="chk"><input type="checkbox" data-lf="currency"${list.currency ? " checked" : ""}${S.canWrite ? "" : " disabled"}> Show $</label>
       <div class="fld" style="flex:0 1 230px"><label for="lFmt">Page size</label><select class="inp" id="lFmt" data-lf="format"${S.canWrite ? "" : " disabled"}><option value="letter"${list.format !== "half" ? " selected" : ""}>Letter, 8.5 × 11 in</option><option value="half"${list.format === "half" ? " selected" : ""}>Half, 4.25 × 11 in (prints 2 per sheet)</option></select></div>
       <label class="chk" title="Prints on its own, like a Last Chance list, instead of with the full menu"><input type="checkbox" data-lf="separate"${list.separate ? " checked" : ""}${S.canWrite ? "" : " disabled"}> Print as its own menu</label>
       ${list.separate ? "" : `<label class="chk"><input type="checkbox" data-lf="include"${list.hidden ? "" : " checked"}${S.canWrite ? "" : " disabled"}> Include in menu export</label>`}
@@ -955,14 +969,13 @@ ${esc(list.subtitle)}</textarea></div>
 ${esc(s.name)}</textarea>
           <span class="count">${n} wine${n === 1 ? "" : "s"}${nh ? ` · ${nh} hidden` : ""}${np ? ` · <b class="needp">${np} need${np === 1 ? "s" : ""} a price</b>` : ""}${s.newPage ? " · new page" : s.newColumn ? " · new column" : ""}</span>
           ${S.canWrite ? `<div class="tools">
+            <button class="ib" data-act="secPage" data-s="${s.id}" aria-pressed="${!!s.newPage}" title="${s.newPage ? "Starts on a new page. Click to undo" : "Start this section on a new page"}" aria-label="Start section on a new page">${ICON.page}</button>
             <button class="ib" data-act="secOpts" data-s="${s.id}" aria-pressed="${opts}" title="Section options" aria-label="Section options">${ICON.gear}</button>
             <button class="ib" data-act="secUp" data-s="${s.id}" aria-label="Move section up" title="Move section up">${ICON.up}</button>
             <button class="ib" data-act="secDown" data-s="${s.id}" aria-label="Move section down" title="Move section down">${ICON.down}</button>
             <button class="ib danger" data-act="delSec" data-s="${s.id}" aria-label="Delete section" title="Delete section">${ICON.trash}</button></div>` : ""}
         </div>
         ${opts ? `<div class="sec-opts">
-          <div class="fld"><label for="sc-${s.id}">Heading when it runs into a new column</label><textarea rows="1" wrap="off" class="inp auto" id="sc-${s.id}" data-sf="contName" data-s="${s.id}" placeholder="${esc(s.name)} Continued">
-${esc(s.contName)}</textarea></div>
           <div class="fld"><label for="sn-${s.id}">Note under heading</label><textarea rows="1" wrap="off" class="inp auto" id="sn-${s.id}" data-sf="note" data-s="${s.id}" placeholder="e.g. *Limited quantities*">
 ${esc(s.note)}</textarea></div>
           <label class="chk"><input type="checkbox" data-sf="newColumn" data-s="${s.id}"${s.newColumn ? " checked" : ""}> Start in a new column</label>
@@ -973,6 +986,7 @@ ${esc(s.note)}</textarea></div>
 ${esc(g.name)}</textarea>
             ${S.canWrite ? `<div class="tools">
               ${list.layout === "bottle" ? `<button class="ib" data-act="sortBin" data-g="${g.id}" title="Sort by bin number" aria-label="Sort by bin number">${ICON.sort}</button>` : ""}
+              ${gi > 0 ? `<button class="ib" data-act="grpPage" data-g="${g.id}" aria-pressed="${!!g.newPage}" title="${g.newPage ? "Starts on a new page. Click to undo" : "Start this subheading on a new page"}" aria-label="Start subheading on a new page">${ICON.page}</button>` : ""}
               <button class="ib" data-act="grpUp" data-g="${g.id}" title="Move subheading up" aria-label="Move subheading up">${ICON.up}</button>
               <button class="ib" data-act="grpDown" data-g="${g.id}" title="Move subheading down" aria-label="Move subheading down">${ICON.down}</button>
               ${s.groups.length > 1 ? `<button class="ib danger" data-act="delGrp" data-g="${g.id}" title="Delete subheading and its wines" aria-label="Delete subheading">${ICON.trash}</button>` : ""}</div>` : ""}
@@ -1096,6 +1110,41 @@ function moveItem(id, d) {
   const ng = groups[gi + d]; if (!ng) return false;
   g.items.splice(i, 1); if (d < 0) ng.items.push(it); else ng.items.unshift(it); return true;
 }
+/* drag a wine by its handle onto another wine (or an empty subheading) to move it there */
+let dragId = null;
+const clearDrop = () => ed.querySelectorAll(".drop-before,.drop-after,.drop-in,.dragging").forEach(x => x.classList.remove("drop-before", "drop-after", "drop-in", "dragging"));
+ed.addEventListener("dragstart", e => {
+  const h = e.target.closest?.("[data-drag]"); if (!h || !S.canWrite) return;
+  dragId = h.dataset.drag; const row = h.closest(".row");
+  e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", dragId);
+  if (row) { try { e.dataTransfer.setDragImage(row, 20, 15); } catch (er) {} setTimeout(() => row.classList.add("dragging"), 0); }
+});
+ed.addEventListener("dragover", e => {
+  if (!dragId) return;
+  const row = e.target.closest(".row[data-row]"), grp = e.target.closest(".grp[data-g]");
+  if (!row && !grp) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = "move";
+  ed.querySelectorAll(".drop-before,.drop-after,.drop-in").forEach(x => x.classList.remove("drop-before", "drop-after", "drop-in"));
+  if (row && row.dataset.row !== dragId) { const r = row.getBoundingClientRect(); row.classList.add(e.clientY < r.top + r.height / 2 ? "drop-before" : "drop-after"); }
+  else if (!row && grp) grp.classList.add("drop-in");
+});
+ed.addEventListener("dragend", () => { dragId = null; clearDrop(); });
+ed.addEventListener("drop", e => {
+  if (!dragId) return; e.preventDefault();
+  const row = ed.querySelector(".row.drop-before,.row.drop-after"), grp = ed.querySelector(".grp.drop-in");
+  const id = dragId; dragId = null;
+  const ix = index(); const src = ix.items[id];
+  if (!src || (!row && !grp)) { clearDrop(); return; }
+  const [it, g0] = src;
+  let tg, at;
+  if (row) { const t = ix.items[row.dataset.row]; if (!t) { clearDrop(); return; } tg = t[1]; at = tg.items.indexOf(t[0]) + (row.classList.contains("drop-after") ? 1 : 0); }
+  else { tg = ix.groups[grp.dataset.g][0]; at = tg.items.length; }
+  const from = g0.items.indexOf(it); g0.items.splice(from, 1);
+  if (g0 === tg && from < at) at--;
+  tg.items.splice(at, 0, it);
+  clearDrop(); renderEditor(); changed();
+  ed.querySelector(`.row[data-row="${id}"]`)?.classList.add("flash");
+});
 ed.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act;
@@ -1129,6 +1178,8 @@ ed.addEventListener("click", e => {
     case "delList": if (!confirmTwice(b, "l" + list.id)) return; S.menu.lists.splice(S.listIdx, 1); S.listIdx = Math.max(0, S.listIdx - 1); break;
     case "addSec": { const s = blankSection(); list.sections.push(s); setTimeout(() => ed.querySelector(`.sec[data-s="${s.id}"] .name`)?.select(), 0); break; }
     case "secOpts": { const id = b.dataset.s; S.openSec.has(id) ? S.openSec.delete(id) : S.openSec.add(id); renderEditor(); return; }
+    case "secPage": { const sx = ix.sections[b.dataset.s]; sx.newPage = !sx.newPage; if (sx.newPage) sx.newColumn = false; break; }
+    case "grpPage": { const [g] = ix.groups[b.dataset.g]; g.newPage = !g.newPage; break; }
     case "secUp": move(list.sections, ix.sections[b.dataset.s], -1); break;
     case "secDown": move(list.sections, ix.sections[b.dataset.s], 1); break;
     case "delSec": if (!confirmTwice(b, "s" + b.dataset.s)) return; list.sections.splice(list.sections.indexOf(ix.sections[b.dataset.s]), 1); break;
