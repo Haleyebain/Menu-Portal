@@ -190,6 +190,8 @@ textarea.auto{resize:none;overflow:hidden}
   .L-cocktail .rhead{display:none}
   .L-cocktail .row{grid-template-columns:62px 1fr 80px;grid-template-areas:"mv prod price" "mv wine wine" "mv rt rt";padding:8px 0;border-bottom:1px solid var(--line-2)}
   .L-glass .row{grid-template-columns:62px 1fr 1fr;grid-template-areas:"mv prod wine" "mv org vin" "mv price price" "mv rt rt";padding:8px 0;border-bottom:1px solid var(--line-2)}
+  .L-simple .row,.L-simple .rhead{grid-template-columns:62px minmax(0,1fr) 80px 58px}
+  .L-simple .row{grid-template-areas:"mv prod price rt"}
   .row .lead{grid-area:mv;align-self:start} .row .f-bin{grid-area:bin} .row .f-producer{grid-area:prod} .row .f-wine{grid-area:wine}
   .row .f-origin{grid-area:org} .row .f-vintage{grid-area:vin} .row .f-format{grid-area:fmt} .row .f-price{grid-area:price} .row .rt{grid-area:rt;justify-content:flex-end}
 }
