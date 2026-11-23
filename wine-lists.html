@@ -758,50 +758,83 @@ function paginate(list) {
   const blocks = listBlocks(list);
   measureBlocks(blocks, list, colW);
   const topFor = pi => (pi === 0 || !geo.topCont) ? geo.top : geo.topCont;
-  const cols = [[]]; let y = 0;
-  const colHNow = () => geo.bottom - topFor(Math.floor((cols.length - 1) / geo.cols));
-  const cur = () => cols[cols.length - 1];
-  const nextCol = (newPage) => {
-    if (newPage) { while (cols.length % geo.cols !== 0) cols.push([]); }
-    cols.push([]); y = 0;
-  };
-  const place = b => { const c = cur(); const prev = c[c.length - 1]?.b; const g = gapBefore(b, prev, geo); c.push({ b, gap: g }); y += g + b.h; };
-  for (let i = 0; i < blocks.length; i++) {
-    const b = blocks[i];
-    if (b.type === "sec" && cur().length) {
-      if (b.newPage) nextCol(true); else if (b.newColumn) nextCol(false);
-    }
-    if ((b.type === "grp" || b.type === "div") && b.newPage && cur().length && cur()[cur().length - 1].b.type !== "sec") {
-      nextCol(true);
-      const secBlock = blocks.find(x => x.type === "sec" && x.sec === b.sec);
-      if (secBlock) place(secBlock.cont);
-      if (b.type === "div") continue;
-    }
-    // keep headers with what follows
-    let need = gapBefore(b, cur().length ? cur()[cur().length - 1].b : null, geo) + b.h;
-    let prev = b;
-    for (let j = i + 1, k = 0; j < blocks.length && k < 2 && (b.type === "sec" || b.type === "grp"); j++, k++) {
-      const nb = blocks[j];
-      need += gapBefore(nb, prev, geo) + nb.h; prev = nb;
-      if (nb.type === "item") break;
-    }
-    if (cur().length && y + need > colHNow()) {
-      nextCol(false);
-      if (b.type !== "sec") {
-        const secBlock = blocks.find(x => x.type === "sec" && x.sec === b.sec);
-        if (secBlock) place(secBlock.cont);
-        if (b.type === "item" && b.grp && b.grp.name) {
-          const gBlock = blocks.find(x => x.type === "grp" && x.grp === b.grp);
-          if (gBlock) place(gBlock.cont);
+  const colHFor = pi => geo.bottom - topFor(pi);
+  const secOf = b => blocks.find(x => x.type === "sec" && x.sec === b.sec);
+
+  /* Lay a run of blocks into columns, starting at the top of a fresh page. limit(page) is the
+     usable column height. Headers stay with what follows them, and a column that starts
+     mid-section repeats the section (and subheading) name. */
+  function flow(seq, startPage, limit) {
+    const cols = [[]]; let y = 0;
+    const pageOf = () => startPage + Math.floor((cols.length - 1) / geo.cols);
+    const cur = () => cols[cols.length - 1];
+    const nextCol = () => { cols.push([]); y = 0; };
+    const place = b => { const c = cur(); const prev = c[c.length - 1]?.b; const g = gapBefore(b, prev, geo); c.push({ b, gap: g }); y += g + b.h; };
+    for (let i = 0; i < seq.length; i++) {
+      const b = seq[i];
+      if (b.type === "sec" && b.newColumn && cur().length) nextCol();
+      let need = gapBefore(b, cur().length ? cur()[cur().length - 1].b : null, geo) + b.h;
+      let prev = b;
+      for (let j = i + 1, k = 0; j < seq.length && k < 2 && (b.type === "sec" || b.type === "grp"); j++, k++) {
+        const nb = seq[j];
+        need += gapBefore(nb, prev, geo) + nb.h; prev = nb;
+        if (nb.type === "item") break;
+      }
+      if (cur().length && y + need > limit(pageOf())) {
+        nextCol();
+        if (b.type !== "sec") {
+          const sb = secOf(b); if (sb) place(sb.cont);
+          if (b.type === "item" && b.grp && b.grp.name) {
+            const gBlock = blocks.find(x => x.type === "grp" && x.grp === b.grp);
+            if (gBlock) place(gBlock.cont);
+          }
+          if (b.type === "div") continue;
         }
-        if (b.type === "div") continue;
+      }
+      place(b);
+    }
+    while (cols.length > 1 && !cols[cols.length - 1].length) cols.pop();
+    return cols;
+  }
+
+  /* Split the list where a section or subheading is set to start on a new page. */
+  const segs = [[]];
+  for (let i = 0; i < blocks.length; i++) {
+    const b = blocks[i], seg = segs[segs.length - 1];
+    if (b.type === "sec" && b.newPage && seg.length) { segs.push([b]); continue; }
+    if ((b.type === "grp" || b.type === "div") && b.newPage && seg.length && seg[seg.length - 1].type !== "sec") {
+      const sb = secOf(b); segs.push(sb ? [sb.cont] : []);
+      if (b.type !== "div") segs[segs.length - 1].push(b);
+      continue;
+    }
+    seg.push(b);
+  }
+
+  /* Each run fills full columns; then the page it ends on is rebalanced, so its columns come
+     out even instead of leaving white space after a page break, a column break or a reorder. */
+  const all = [];
+  for (const seg of segs) {
+    if (!seg.length) continue;
+    const startPage = all.length / geo.cols;
+    let cols = flow(seg, startPage, colHFor);
+    if (geo.cols > 1) {
+      const lastStart = Math.floor((cols.length - 1) / geo.cols) * geo.cols;
+      const pi = startPage + lastStart / geo.cols;
+      const tail = cols.slice(lastStart).flat().map(e => e.b);
+      const fits = h => flow(tail, pi, () => h).length <= geo.cols;
+      let hi = colHFor(pi);
+      if (tail.length && fits(hi)) {
+        let lo = 0;
+        while (hi - lo > 1) { const mid = (lo + hi) / 2; if (fits(mid)) hi = mid; else lo = mid; }
+        cols = cols.slice(0, lastStart).concat(flow(tail, pi, () => hi));
       }
     }
-    place(b);
+    while (cols.length % geo.cols) cols.push([]);
+    all.push(...cols);
   }
-  // group into pages
+  if (!all.length) all.push(...Array.from({ length: geo.cols }, () => []));
   const pages = [];
-  for (let i = 0; i < cols.length; i += geo.cols) pages.push(cols.slice(i, i + geo.cols));
+  for (let i = 0; i < all.length; i += geo.cols) pages.push(all.slice(i, i + geo.cols));
   while (pages.length > 1 && pages[pages.length - 1].every(c => !c.length)) pages.pop();
   return { pages, geo, colW, topFor };
 }
