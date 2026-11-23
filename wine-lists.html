@@ -243,6 +243,7 @@ textarea.auto{resize:none;overflow:hidden}
 .it-l1 .wn{font-size:11.2px}
 .it-l2{font-size:11px;line-height:13px}
 .it-org{font:italic 500 9.6px/13px "WL Gotham",sans-serif;letter-spacing:.06em}
+.it-org.il{display:inline;margin-left:.7em;line-height:inherit}
 .it-pr{font:300 10.3px/14px "WL Gotham",sans-serif;letter-spacing:.09em;white-space:nowrap;text-align:right;margin-right:-.09em}
 .lay-simple .it-l1{font:300 11px/15px "WL Gotham",sans-serif;letter-spacing:.09em}
 .lay-simple .it-pr{line-height:15px}
@@ -381,6 +382,41 @@ dialog::backdrop{background:rgba(10,14,18,.45)}
 .empty h1{font-size:22px;letter-spacing:.06em;margin:0;text-transform:uppercase}
 .empty p{color:var(--muted);margin:0}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Sam's, Alpin Room and The Cabin print 2 pt larger (Nov 2026). Each rule repeats the one above it
+   with .fs-up in front, so which rule wins between themes and layouts is unchanged. */
+.fs-up .b-sec .nm{font-size:20.17px;line-height:1.1}
+.fs-up .b-sec .pl{font-size:12.17px;line-height:1}
+.fs-up .b-note{font-size:12.67px;line-height:1.2}
+.fs-up .b-grp{font-size:12.67px;line-height:1.2}
+.fs-up .it-l1{font-size:calc(13.87px * var(--sq, 1));line-height:calc(17.33px * var(--lh-k, 1))}
+.fs-up .it-l1 .wn{font-size:calc(13.87px * var(--sq, 1))}
+.fs-up .it-l2{font-size:13.67px;line-height:calc(16.15px * var(--lh-k, 1))}
+.fs-up .it-org{font-size:12.27px;line-height:calc(16.61px * var(--lh-k, 1))}
+.fs-up .it-org.il{line-height:inherit;font-size:calc(12.27px * var(--sq, 1))}
+.th-sams .it-org{font-family:"WL Gotham Light","WL Gotham",sans-serif;font-weight:300}
+.fs-up .it-pr{font-size:12.97px;line-height:calc(17.62px * var(--lh-k, 1))}
+.fs-up .lay-simple .it-l1{font-size:13.67px;line-height:calc(18.64px * var(--lh-k, 1))}
+.fs-up .lay-simple .it-pr{line-height:calc(18.64px * var(--lh-k, 1))}
+.fs-up .th-alpin .b-sec .nm{font-size:27.67px;line-height:1}
+.fs-up .th-alpin .b-sec .pl{font-size:10.67px;line-height:1}
+.fs-up .th-alpin .b-grp{font-size:16.17px;line-height:1.2}
+.fs-up .th-alpin .b-note{font-size:13.67px;line-height:1.3}
+.fs-up .ai{font-size:14.67px;line-height:calc(21.14px * var(--lh-k, 1))}
+.fs-up .ai-p{font-size:14.67px;line-height:calc(21.14px * var(--lh-k, 1))}
+.fs-up .th-cabin .b-sec .nm{font-size:21.87px;line-height:1}
+.fs-up .th-cabin .b-sec .pl{font-size:10.87px;line-height:1}
+.fs-up .th-cabin .b-grp{font-size:14.17px;line-height:1.2}
+.fs-up .th-cabin .b-note{font-size:12.67px;line-height:1.3}
+.fs-up .ci{font-size:12.17px;line-height:calc(20.11px * var(--lh-k, 1))}
+.fs-up .ck-n{font-size:13.87px;line-height:calc(19.81px * var(--lh-k, 1))}
+.fs-up .ck-p{font-size:13.17px;line-height:calc(20.06px * var(--lh-k, 1))}
+.fs-up .ck-d{font-size:12.67px;line-height:calc(17.73px * var(--lh-k, 1))}
+.fs-up .th-alpin .ck-n{font-size:15.67px;line-height:calc(21.69px * var(--lh-k, 1))}
+.fs-up .th-alpin .ck-p, .fs-up .th-alpin .ck-d{font-size:14.67px;line-height:calc(20.78px * var(--lh-k, 1))}
+.fs-up .th-cabin .ck-n{font-size:13.17px;line-height:calc(20.06px * var(--lh-k, 1))}
+.fs-up .th-cabin .ck-p, .fs-up .th-cabin .ck-d{font-size:12.67px;line-height:calc(19px * var(--lh-k, 1))}
+.fs-up .th-alpin.fmt-half .ai, .fs-up .th-alpin.fmt-half .ai-p{font-size:13.67px;line-height:calc(19.88px * var(--lh-k, 1))}
 </style>
 
 <div class="app" id="app">
@@ -479,8 +515,10 @@ dialog::backdrop{background:rgba(10,14,18,.45)}
 const CLIENT = Math.random().toString(36).slice(2, 10);
 const PAGE_W = 816, PAGE_H = 1056;
 const GEO = {
-  glass:  { top: 205, left: 133, width: 550, cols: 1, gap: 0,  bottom: 905, secGap: 40, grpGap: 18, itemGap: 9,  hdrGap: 9, secGrpGap: 18 },
-  bottle: { top: 170, left: 58,  width: 700, cols: 2, gap: 30, bottom: 908, secGap: 30, grpGap: 18, itemGap: 9,  hdrGap: 9, secGrpGap: 18 },
+  /* By the Glass margins match By the Bottle (Nov 2026; was left 133, width 550) */
+  glass:  { top: 205, left: 60, width: 696, cols: 1, gap: 0,  bottom: 905, secGap: 40, grpGap: 18, itemGap: 9,  hdrGap: 9, secGrpGap: 18 },
+  /* By the Bottle: one column with narrow margins, each wine on one line (Nov 2026; was two columns, left 58, width 700) */
+  bottle: { top: 170, left: 60, width: 696, cols: 1, gap: 0, bottom: 908, secGap: 30, grpGap: 18, itemGap: 9,  hdrGap: 9, secGrpGap: 18 },
   simple: { top: 188, left: 104, width: 640, cols: 2, gap: 56, bottom: 908, secGap: 30, grpGap: 10, itemGap: 2,  hdrGap: 2 },
   cocktail: { top: 205, left: 158, width: 500, cols: 1, gap: 0, bottom: 905, secGap: 38, grpGap: 20, itemGap: 16, hdrGap: 16, secGrpGap: 16, grpItemGap: 10 },
 };
@@ -493,7 +531,9 @@ const THEMES = {
   c9: { label: "Cloud Nine (brush frame, dot leaders)", geo: { glass: { ...C9, top: 216, topCont: 216, left: 116, width: 581, hdrGap: 18, secGap: 37 }, bottle: C9, simple: { ...C9, cols: 2, gap: 40 }, cocktail: { ...C9, top: 186, topCont: 186, left: 168, width: 480, secGap: 32, itemGap: 15, hdrGap: 16, grpGap: 20, secGrpGap: 14, grpItemGap: 10 } }, accent: "#06060C", ink: "#142F39", logo: "builtin:c9" },
   alpin: { label: "Alpin Room (framed page, leader lines)", geo: { glass: ALPIN, bottle: ALPIN, simple: { ...ALPIN, cols: 2, gap: 30 }, cocktail: { ...ALPIN, left: 158, width: 500, itemGap: 16 } }, accent: "#142F39", ink: "#1E2A33", logo: "builtin:alpin" },
 };
-const themeOf = () => (THEMES[S.menu?.theme] ? S.menu.theme : "sams");
+const FS_UP = new Set(["sams", "alpin", "cabin"]);   // these menus print 2 pt larger
+const samsOneLine = L => L === "bottle" && themeOf() === "sams";   // Sam's bottle list: each wine on a single line
+const themeOf = () => { const t = THEMES[S.menu?.theme] ? S.menu.theme : "sams"; document.documentElement.classList.toggle("fs-up", FS_UP.has(t)); document.documentElement.classList.toggle("th-sams", t === "sams"); return t; };
 const HALF = { sams: { left: 30, width: 348 }, alpin: { left: 36, width: 336, top: 233, topCont: 91 }, cabin: { left: 30, width: 348, bottom: 930 }, c9: { left: 30, width: 348 } };
 const geoFor = list => {
   const g = THEMES[themeOf()].geo[list.layout] || GEO[list.layout];
@@ -507,6 +547,7 @@ const FONT_FILES = [
   ["WL Copperplate", "cpLight", "300", "normal"],
   ["WL Gotham", "gLight", "300", "normal"],
   ["WL Gotham", "gMedIt", "500", "italic"],
+  ["WL Gotham Light", "gLight", "300", "normal"],
   ["WL Lakers", "lakers", "400", "normal"],
   ["WL OldStandard", "osReg", "400", "normal"],
   ["WL OldStandard", "osBold", "700", "normal"],
@@ -572,7 +613,8 @@ function fontKey(cs) {
   const w = parseInt(cs.fontWeight, 10);
   if (fam === "WL Archivo") return "archivo";
   if (fam === "WL Copperplate") return w >= 600 ? "cpBold" : w <= 350 ? "cpLight" : "cpReg";
-  if (fam === "WL Gotham") return cs.fontStyle === "italic" ? "gMedIt" : "gLight";
+  if (fam === "WL Gotham Light") return "gLight";
+  if (fam === "WL Gotham") return cs.fontStyle === "italic" && w > 400 ? "gMedIt" : "gLight";
   if (fam === "WL Lakers") return "lakers";
   if (fam === "WL Znikomit") return "znik";
   if (fam === "WL Bebas") return "bebas";
@@ -697,6 +739,12 @@ function blockHTML(b, list) {
       }
       if (L === "simple") return `<div class="b-item" data-id="${it.id}"><div class="it-l1">${br(it.producer)}</div><div class="it-pr">${priceHTML}</div></div>`;
       const bin = L === "bottle" && it.bin ? `${esc(it.bin)} ` : "";
+      /* Sam's bottles: bin, producer, wine, region and vintage all on one line, each in its own font */
+      if (samsOneLine(L)) {
+        const one = t => esc(String(t || "").replace(/\s*\n\s*/g, " "));   // typed line breaks become spaces here
+        const org1 = originLine(it);
+        return `<div class="b-item" data-id="${it.id}"><div><div class="it-l1"${b.sq ? ` style="--sq:${b.sq}"` : ""}>${bin}${one(up(it.producer))}${it.wine ? ` <span class="wn">${one(it.wine)}</span>` : ""}${org1 ? `<span class="it-org il">${one(org1)}</span>` : ""}</div></div><div class="it-pr">${priceHTML}</div></div>`;
+      }
       const wrap = it.wrap || b.autoWrap;
       const wn = it.wine ? (wrap ? "" : ` <span class="wn">${br(it.wine)}</span>`) : "";
       const l2 = it.wine && wrap ? `<div class="it-l2">${br(it.wine)}</div>` : "";
@@ -708,13 +756,14 @@ function blockHTML(b, list) {
 }
 function listBlocks(list) {
   const out = [];
-  let first = true;
+  let first = true, prevName = null;
   for (const s of list.sections) {
     const groups = s.groups.map(g => ({ g, items: g.items.filter(it => !it.hidden && (it.producer || it.wine)) }));
     if (!groups.some(x => x.items.length)) continue;
     out.push({ type: "sec", text: s.name, note: s.note, sec: s, showLabels: first, newPage: s.newPage, newColumn: s.newColumn,
-               cont: { type: "sec", text: s.name, sec: s, showLabels: false } });   // a continued section repeats its current name
-    first = false;
+               cont: { type: "sec", text: s.name, sec: s, showLabels: false },   // a continued section repeats its current name
+               same: prevName !== null && String(s.name || "").trim().toLowerCase() === prevName });   // same kind of wine as the section before
+    first = false; prevName = String(s.name || "").trim().toLowerCase();
     let gi = 0;
     for (const { g, items } of groups) {
       if (!items.length) continue;
@@ -741,19 +790,51 @@ function measureBlocks(blocks, list, colW) {
   const host = $("#measure");
   const all = [];
   for (const b of blocks) { all.push(b); if (b.cont) all.push(b.cont); }
-  host.innerHTML = `<div class="wl-page th-${themeOf()} lay-${list.layout}${list.format === "half" ? " fmt-half" : ""}" style="height:auto;${pageVars()}"><div class="wl-col" style="position:static;width:${colW}px">${all.map(b => `<div class="mb">${blockHTML(b, list)}</div>`).join("")}</div></div>`;
+  host.innerHTML = `<div class="wl-page th-${themeOf()} lay-${list.layout}${list.format === "half" ? " fmt-half" : ""}" style="height:auto;${pageVars(MEASURE_LHK)}"><div class="wl-col" style="position:static;width:${colW}px">${all.map(b => `<div class="mb">${blockHTML(b, list)}</div>`).join("")}</div></div>`;
   let els = host.querySelectorAll(".mb");
   // a wine name that would break mid-line moves to its own line instead
   let again = false;
   all.forEach((b, i) => {
-    if (b.type !== "item" || b.item.wrap || !b.item.wine || list.layout === "simple" || /\n/.test(b.item.producer + b.item.wine)) return;
+    if (b.type !== "item" || samsOneLine(list.layout) || b.item.wrap || !b.item.wine || list.layout === "simple" || /\n/.test(b.item.producer + b.item.wine)) return;
     const l1 = els[i].querySelector(".it-l1"); if (!l1) return;
     if (l1.getBoundingClientRect().height > parseFloat(getComputedStyle(l1).lineHeight) * 1.5) { b.autoWrap = true; els[i].innerHTML = blockHTML(b, list); again = true; }
   });
+  /* Sam's bottle list: a wine too long for one line is set a little smaller, just enough to fit */
+  if (samsOneLine(list.layout)) all.forEach((b, i) => {
+    if (b.type !== "item") return;
+    for (let k = 0.97; k >= 0.76; k -= 0.03) {
+      const l1 = els[i].querySelector(".it-l1"); if (!l1) return;
+      if (l1.getBoundingClientRect().height <= parseFloat(getComputedStyle(l1).lineHeight) * 1.4) return;
+      b.sq = Math.round(k * 100) / 100; els[i].innerHTML = blockHTML(b, list);
+    }
+  });
   all.forEach((b, i) => b.h = els[i].getBoundingClientRect().height);
 }
+/* By the Glass and Spirits lists are one-page menus. With the larger type on Sam's, Alpin Room and
+   The Cabin, a list that spills just onto a second page gets its spacing between wines and
+   headings tightened, a step at a time, until it fits on one page again. Type size stays put. */
+const GAP_KEYS = ["secGap", "grpGap", "hdrGap", "itemGap", "secGrpGap", "grpItemGap"];
+let MEASURE_LHK = 1;
 function paginate(list) {
-  const geo = geoFor(list);
+  const base = paginateWith(list, geoFor(list));
+  if (base.pages.length !== 2 || !FS_UP.has(themeOf()) || !["glass", "simple"].includes(list.layout)) return base;
+  const tryFit = (k, free, lhK) => {
+    const g = { ...geoFor(list) };
+    for (const key of GAP_KEYS) if (typeof g[key] === "number") g[key] = Math.round(g[key] * k * 10) / 10;
+    MEASURE_LHK = lhK;
+    try { const r = paginateWith(list, g, free); r.lhK = lhK; return r.pages.length === 1 ? r : null; } finally { MEASURE_LHK = 1; }
+  };
+  /* in order: tighter gaps, then slightly tighter line spacing, keeping the team's column breaks;
+     only then let the columns flow freely. Each step takes the least tightening that fits. */
+  for (const [free, lhK] of [[false, 1], [false, 0.92], [false, 0.85], [true, 1], [true, 0.92], [true, 0.85]]) {
+    if (!tryFit(0.45, free, lhK)) continue;
+    let lo = 0.45, hi = 1, best = tryFit(0.45, free, lhK);
+    for (let n = 0; n < 5; n++) { const mid = (lo + hi) / 2, r = tryFit(mid, free, lhK); if (r) { best = r; lo = mid; } else hi = mid; }
+    return best;
+  }
+  return base;
+}
+function paginateWith(list, geo, freeCols = false) {
   const colW = (geo.width - geo.gap * (geo.cols - 1)) / geo.cols;
   const blocks = listBlocks(list);
   measureBlocks(blocks, list, colW);
@@ -769,24 +850,33 @@ function paginate(list) {
     const pageOf = () => startPage + Math.floor((cols.length - 1) / geo.cols);
     const cur = () => cols[cols.length - 1];
     const nextCol = () => { cols.push([]); y = 0; };
+    const pageTop = () => (cols.length - 1) % geo.cols === 0;   // first column of a page
     const place = b => { const c = cur(); const prev = c[c.length - 1]?.b; const g = gapBefore(b, prev, geo); c.push({ b, gap: g }); y += g + b.h; };
     for (let i = 0; i < seq.length; i++) {
       const b = seq[i];
-      if (b.type === "sec" && b.newColumn && cur().length) nextCol();
+      if (b.type === "sec" && b.newColumn && !freeCols && cur().length) nextCol();
+      /* the same kind of wine carrying on (a section with the same name as the last one):
+         no new header, unless it lands at the top of a page */
+      if (b.type === "sec" && b.same && !(pageTop() && !cur().length)) continue;
       let need = gapBefore(b, cur().length ? cur()[cur().length - 1].b : null, geo) + b.h;
       let prev = b;
-      for (let j = i + 1, k = 0; j < seq.length && k < 2 && (b.type === "sec" || b.type === "grp"); j++, k++) {
+      /* a heading stays with at least two of its wines (or all of them, if fewer) */
+      for (let j = i + 1, k = 0, items = 0; j < seq.length && k < 4 && (b.type === "sec" || b.type === "grp"); j++, k++) {
         const nb = seq[j];
+        if (nb.type === "sec" && !nb.same) break;
         need += gapBefore(nb, prev, geo) + nb.h; prev = nb;
-        if (nb.type === "item") break;
+        if (nb.type === "item" && ++items >= 2) break;
       }
       if (cur().length && y + need > limit(pageOf())) {
         nextCol();
         if (b.type !== "sec") {
-          const sb = secOf(b); if (sb) place(sb.cont);
-          if (b.type === "item" && b.grp && b.grp.name) {
-            const gBlock = blocks.find(x => x.type === "grp" && x.grp === b.grp);
-            if (gBlock) place(gBlock.cont);
+          /* a page that starts mid-section repeats its heading; the next column on the same page doesn't */
+          if (pageTop()) {
+            const sb = secOf(b); if (sb) place(sb.cont);
+            if (b.type === "item" && b.grp && b.grp.name) {
+              const gBlock = blocks.find(x => x.type === "grp" && x.grp === b.grp);
+              if (gBlock) place(gBlock.cont);
+            }
           }
           if (b.type === "div") continue;
         }
@@ -838,9 +928,9 @@ function paginate(list) {
   while (pages.length > 1 && pages[pages.length - 1].every(c => !c.length)) pages.pop();
   return { pages, geo, colW, topFor };
 }
-function pageVars() {
+function pageVars(lhK) {
   const m = S.menu || {};
-  return `--wl-accent:${esc(m.accent || "#E8AD4C")};--wl-ink:${esc(m.ink || "#2C2E35")}`;
+  return `--wl-accent:${esc(m.accent || "#E8AD4C")};--wl-ink:${esc(m.ink || "#2C2E35")}${lhK && lhK !== 1 ? `;--lh-k:${lhK}` : ""}`;
 }
 function logoHTML() {
   const m = S.menu;
@@ -858,11 +948,11 @@ function pageHTML(list, cols, pg, pi = 0) {
   }).join("");
   if (themeOf() === "cabin") {
     const head = pi === 0 ? `<div class="wl-title">${br(up(list.title))}</div>${list.subtitle ? `<div class="wl-sub">${br(up(list.subtitle))}</div>` : ""}` : "";
-    return `<div class="wl-page th-cabin lay-${list.layout}${fmt}" style="${pageVars()}">${head}${colsHTML}<div class="wl-foot">${logoHTML()}</div></div>`;
+    return `<div class="wl-page th-cabin lay-${list.layout}${fmt}" style="${pageVars(pg.lhK)}">${head}${colsHTML}<div class="wl-foot">${logoHTML()}</div></div>`;
   }
   if (themeOf() === "c9") {
     const head = `<img class="c9-frame" data-pdf-img alt="" src="${half ? ASSETS.c9FrameHalf : ASSETS.c9Frame}"><div class="c9-top"><img data-pdf-img alt="" src="${ASSETS.c9Top}"><div class="wl-title">${br(up(list.title))}</div><img data-pdf-img alt="" src="${ASSETS.c9Top}"></div>${list.subtitle ? `<div class="wl-sub">${br(up(list.subtitle))}</div>` : ""}`;
-    return `<div class="wl-page th-c9 lay-${list.layout}${fmt}" style="${pageVars()}">${head}${colsHTML}<div class="wl-foot">${logoHTML()}</div></div>`;
+    return `<div class="wl-page th-c9 lay-${list.layout}${fmt}" style="${pageVars(pg.lhK)}">${head}${colsHTML}<div class="wl-foot">${logoHTML()}</div></div>`;
   }
   if (themeOf() === "alpin") {
     const head = pi === 0 ? `<div class="wl-title">${br(up(list.title))}</div><div class="wl-rule" data-pdf-rule></div>${list.subtitle ? `<div class="wl-sub">${br(up(list.subtitle))}</div>` : ""}` : "";
@@ -870,9 +960,9 @@ function pageHTML(list, cols, pg, pi = 0) {
       ? [[14, 24, W - 28, 1.3], [14, 24, 1.3, 969.7], [W - 15.3, 24, 1.3, 969.7], [14, 992.4, 78, 1.3], [W - 92, 992.4, 78, 1.3]]   // half panel: frame starts higher, no dead space above it
       : [[28, 72, 760, 1.3], [28, 72, 1.3, 921.7], [786.7, 72, 1.3, 921.7], [28, 992.4, 189, 1.3], [601, 992.4, 187, 1.3]])
       .map(([l, t, w, h]) => `<span data-pdf-rule style="left:${l}px;top:${t}px;width:${w}px;height:${h}px"></span>`).join("");
-    return `<div class="wl-page th-alpin lay-${list.layout}${fmt}" style="${pageVars()}"><div class="wl-frame">${fr}</div>${head}${colsHTML}<div class="wl-foot">${logoHTML()}</div></div>`;
+    return `<div class="wl-page th-alpin lay-${list.layout}${fmt}" style="${pageVars(pg.lhK)}"><div class="wl-frame">${fr}</div>${head}${colsHTML}<div class="wl-foot">${logoHTML()}</div></div>`;
   }
-  return `<div class="wl-page th-sams lay-${list.layout}${fmt}" style="${pageVars()}">
+  return `<div class="wl-page th-sams lay-${list.layout}${fmt}" style="${pageVars(pg.lhK)}">
     <div class="wl-title">${br(up(list.title))}</div>
     <div class="wl-orn"><div class="r" data-pdf-rule></div><img data-pdf-img alt="" src="${ASSETS.orn}"><div class="r" data-pdf-rule></div></div>
     ${list.subtitle ? `<div class="wl-sub">${br(up(list.subtitle))}</div>` : ""}
@@ -942,7 +1032,7 @@ ${esc(it[k])}</textarea>`
   const prices = list.priceLabels.map((lab, pi) => `<input class="num" data-f="price" data-p="${pi}" data-i="${it.id}" value="${esc(it.prices[pi])}" placeholder="${esc(lab)}" aria-label="${esc(lab)} price" inputmode="decimal"${ro}>`).join("");
   const mv = `<div class="lead">${S.canWrite ? `<span class="grip" draggable="true" data-drag="${it.id}" title="Drag to reorder" aria-hidden="true">${ICON.grip}</span>` : ""}<input type="checkbox" class="sel" data-sel="${it.id}"${S.sel.has(it.id) ? " checked" : ""} aria-label="Select to copy"><div class="mv"><button class="ib" data-act="itemUp" data-i="${it.id}" aria-label="Move up">${ICON.up}</button><button class="ib" data-act="itemDown" data-i="${it.id}" aria-label="Move down">${ICON.down}</button></div></div>`;
   const rt = `<div class="rt">
-    ${L !== "simple" && L !== "cocktail" ? `<button class="ib" data-act="wrap" data-i="${it.id}" aria-pressed="${!!it.wrap}" title="Put the wine name on its own line" aria-label="Wine name on its own line">${ICON.wrap}</button>` : ""}
+    ${L !== "simple" && L !== "cocktail" && !samsOneLine(L) ? `<button class="ib" data-act="wrap" data-i="${it.id}" aria-pressed="${!!it.wrap}" title="Put the wine name on its own line" aria-label="Wine name on its own line">${ICON.wrap}</button>` : ""}
     <button class="ib" data-act="hide" data-i="${it.id}" aria-pressed="${!!it.hidden}" title="${it.hidden ? "Hidden from print (86'd). Click to show" : "Hide from print (86 it)"}" aria-label="Hide from print">${it.hidden ? ICON.eyeOff : ICON.eye}</button>
     <button class="ib danger" data-act="delItem" data-i="${it.id}" title="Delete" aria-label="Delete wine">${ICON.trash}</button></div>`;
   let mid = "";
@@ -1525,7 +1615,7 @@ function pageCSS() {
 }
 function exportHTML() {
   const pages = buildPages(curList()?.separate ? S.listIdx : null);
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(fileBase())}</title><style>
+  return `<!doctype html><html${FS_UP.has(themeOf()) ? ' class="fs-up"' : ""}><head><meta charset="utf-8"><title>${esc(fileBase())}</title><style>
 ${fontFaceCSS()}
 @page{size:8.5in 11in;margin:0}
 html,body{margin:0;padding:0;background:#888}
@@ -1601,7 +1691,7 @@ async function exportPDF(onlyIdx) {
     while ((node = walker.nextNode())) {
       const txt = node.nodeValue; if (!txt.trim()) continue;
       const cs = getComputedStyle(node.parentElement); const key = fontKey(cs); if (!key) continue;
-      const size = parseFloat(cs.fontSize) * K; const color = col(cs.color); const font = fonts[key];
+      const size = parseFloat(cs.fontSize) * K; const color = col(cs.color); const font = fonts[key]; const slant = cs.fontStyle === "italic" && key === "gLight";
       const strokeW = parseFloat(cs.webkitTextStrokeWidth || "0") || 0;
       if (strokeW > 0) { const m = (cs.color.match(/[\d.]+/g) || [0, 0, 0]).map(Number);
         page.pushOperators(PDFLib.pushGraphicsState(), PDFLib.setTextRenderingMode(PDFLib.TextRenderingMode.FillAndOutline), PDFLib.setLineWidth(strokeW * K), PDFLib.setStrokingRgbColor(m[0] / 255, m[1] / 255, m[2] / 255), PDFLib.setLineJoin(PDFLib.LineJoinStyle.Round)); }
@@ -1613,7 +1703,7 @@ async function exportPDF(onlyIdx) {
           const r = range.getClientRects()[0];
           if (r) {
             const base = r.top + ratio[key] * r.height;
-            try { page.drawText(ch, { x: X(r.left), y: Y(base), size, font, color }); } catch (e) { /* glyph missing */ }
+            try { page.drawText(ch, { x: X(r.left), y: Y(base), size, font, color, ...(slant ? { ySkew: PDFLib.degrees(12) } : {}) }); } catch (e) { /* glyph missing */ }
           }
         }
         off += len;
