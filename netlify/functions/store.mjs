@@ -13,8 +13,10 @@
 import { getStore } from "@netlify/blobs";
 import { resolveKey, json } from "./_lib/access.mjs";
 import wineSeed from "../../data/wine-seed.json";
+import digitalSeed from "../../data/digital-seed.json";
+import { DIGITAL_PROPS, digitalEditAllowed } from "./_lib/digital.mjs";
 
-const COLLECTIONS = { "wine-lists": ["menus"], "special-menus": ["menus", "history"], "signage": ["signs"] };
+const COLLECTIONS = { "wine-lists": ["menus"], "special-menus": ["menus", "history"], "signage": ["signs"], "digital-menus": ["menus"] };
 const ID = /^[a-z0-9][a-z0-9-]{0,79}$/;
 const VER = /^\d{13}(-[A-Za-z0-9_-]{0,64})?$/;
 const MAX_BYTES = 1_000_000;
@@ -27,9 +29,10 @@ const WINE_PROPS = { "sams": "sams", "alpin-room": "alpin", "the-cabin": "cabin"
 function propertyOf(bucket, coll, id, data) {
   if (bucket === "signage") return "*";   // signs are shared by everyone with the Basic Signage tool
   if (bucket === "wine-lists") return WINE_PROPS[id] || null;
+  if (bucket === "digital-menus") return DIGITAL_PROPS.includes(id) ? id : null;   // one document per restaurant
   const menuId = coll === "history" ? String(data?.menu || id.replace(/-\d+$/, "")) : id;
   const p = menuId.split("-")[0];
-  return ["sams", "alpin", "cabin", "c9", "elk", "up4", "twocreeks", "cliffhouse", "backyard"].includes(p) ? p : null;
+  return ["sams", "alpin", "cabin", "c9", "elk", "up4", "twocreeks", "cliffhouse", "backyard", "catering"].includes(p) ? p : null;
 }
 const allowed = (meta, prop) => meta.allProperties || prop === "*" || (prop && meta.properties.includes(prop));
 
@@ -124,6 +127,12 @@ export default async (req, context) => {
     try { data = JSON.parse(text); } catch { return json({ error: "Invalid JSON" }, 400); }
     if (!data || typeof data !== "object") return json({ error: "Not a document" }, 400);
     if (!allowed(meta, propertyOf(bucket, coll, id, data))) return json({ error: "not_entitled" }, 403);
+    if (bucket === "digital-menus") {
+      /* Digital boards: only the changes this code may make (see _lib/digital.mjs) */
+      const current = (await store.get(`menus/${id}`, { type: "json" })) || digitalSeed[id];
+      if (!current) return json({ error: "Unknown board set" }, 404);
+      if (!digitalEditAllowed(current, data, (meta.perms || []).includes("digital-pricing"))) return json({ error: "not_permitted" }, 403);
+    }
     if (coll === "menus") {
       const before = await store.get(`menus/${id}`, { type: "json" });
       if (before) await snapshot(store, id, before, before._editor || "", req.headers.get("x-restore") === "1");
