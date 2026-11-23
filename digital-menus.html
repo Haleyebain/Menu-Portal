@@ -136,7 +136,7 @@ select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:v
     <span class="grow"></span>
     <div class="status" id="status" aria-live="polite"><i></i><span>Connecting…</span></div>
     <div class="menuwrap">
-      <button class="btn primary" id="exportBtn" title="Downloads all six boards and opens an email to send them">
+      <button class="btn primary" id="exportBtn" title="Downloads all six boards and opens a new email in your company Outlook">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Export &amp; Send</button>
     </div>
   </header>
@@ -157,7 +157,7 @@ select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:v
 const PROPS = [
   { id: "sundeck", name: "Sundeck", art: "assets/digital/sundeck/", boards: ["pizza", "wok", "soup", "grill1", "grill2", "grill3"] },
 ];
-const ART_V = "?v=20261122";
+const ART_V = "?v=20261123";
 const GOLD = "#F0DD90";
 /* Layout, measured from the design files (pixels on a 1920 × 1080 board).
    S name size · nameP name line pitch · ds/dl description size and line pitch ·
@@ -321,7 +321,7 @@ function renderEditor() {
     return `<button class="tab" role="tab" aria-selected="${b === S.board}" data-act="tab" data-b="${b}"><b>${esc(BOARDS[b].name)}</b><small>${sub}</small></button>`;
   }).join("");
   let body = `<div class="banner" id="overBanner"${S.over ? "" : " hidden"}>Text on this board runs past its space. Shorten the special, or hide an item.</div>`;
-  body += `<p class="hint" style="margin:0">${S.canPrice ? "You can show or hide items, edit specials, set prices and change the Wok lineup." : "You can show or hide items, edit specials and change the Wok lineup. Prices are set by F&amp;B leadership."} Changes save automatically. When you’re done, click Export &amp; Send: the six boards download and an email opens to send them.</p>`;
+  body += `<p class="hint" style="margin:0">${S.canPrice ? "You can show or hide items, edit specials, set prices and change the Wok lineup." : "You can show or hide items, edit specials and change the Wok lineup. Prices are set by F&amp;B leadership."} Changes save automatically. When you’re done, click Export &amp; Send: the six boards download and a new email opens in your company Outlook.</p>`;
   if (S.board === "wok") {
     body += `<section class="card"><div class="card-h"><b>Wok station</b></div><div class="card-b">
       <label class="switch"><input type="checkbox" data-act="closed"${d.wok.closed ? " checked" : ""}${S.canWrite ? "" : " disabled"}> <span><b>Wok closed</b><br><span class="hint">Shows the Sundeck closed screen (Grill and Pizza arrows) instead of the menu.</span></span></label>
@@ -479,8 +479,9 @@ function download(name, blob) {
   const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
-/* Export & Send: every board as a PNG, then an email to the people who load the screens.
-   An email link can't carry attachments, so the person attaches the six downloaded images. */
+/* Export & Send: every board as a PNG, then a new message in the person's company Outlook
+   (Outlook on the web, signed in with their Aspen Snowmass account), not the computer's default
+   mail app. A compose link can't carry attachments, so the person attaches the six images. */
 const SEND_TO = ["hbain@aspensnowmass.com", "erudow@aspensnowmass.com", "sjohnson1@aspensnowmass.com"];
 function emailLink(files) {
   const d = S.doc, I = d.items, now = new Date();
@@ -489,16 +490,26 @@ function emailLink(files) {
   const hidden = all.filter(id => I[id]?.hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " "));
   const specials = BOARDS.grill3.cols.flatMap(c => c.items).filter(id => I[id].special && !I[id].hidden).map(id => `${I[id].name.replace(/\s*\n\s*/g, " ")}${I[id].price ? " " + I[id].price : ""}`);
   const lines = [
-    `Updated ${P().name} menu boards for ${date}, ${files.length} images attached:`, "", ...files.map(f => "  " + f), "",
+    `Updated ${P().name} menu boards for ${date}.`, "",
     `Wok: ${d.wok.closed ? "closed screen" : d.wok.slots.filter(id => !I[id].hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " ")).join(", ")}`,
     `Grill 3 specials: ${specials.join(", ") || "none showing"}`,
     `Hidden today: ${hidden.join(", ") || "nothing"}`,
   ];
-  return `mailto:${SEND_TO.join(",")}?subject=${encodeURIComponent(`${P().name} digital menus ${date}`)}&body=${encodeURIComponent(lines.join("\n"))}`;
+  return "https://outlook.office.com/mail/deeplink/compose?to=" + encodeURIComponent(SEND_TO.join(";")) +
+    "&subject=" + encodeURIComponent(`${P().name} digital menus ${date}`) + "&body=" + encodeURIComponent(lines.join("\n"));
+}
+function outlookFallback(url, n) {   /* the browser blocked the new tab: offer it as a button instead */
+  let t = $(".toast"); if (!t) { t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+  t.innerHTML = `Saved ${n} images to your Downloads. <a href="${esc(url)}" target="_blank" rel="noopener" style="color:inherit;font-weight:700">Open Outlook email</a>`;
+  t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 30000);
 }
 let exporting = false;
 $("#exportBtn").addEventListener("click", async () => {
   if (exporting) return; exporting = true; $("#exportBtn").disabled = true;
+  /* open the Outlook tab now, while the click still counts, so the browser doesn't block it */
+  let mail = null;
+  try { mail = window.open("", "_blank"); } catch (e) {}
+  if (mail) { try { mail.document.title = "Opening Outlook…"; mail.document.body.innerHTML = '<p style="font:16px system-ui,sans-serif;margin:40px">Building the menu boards. Outlook opens here in a moment.</p>'; } catch (e) {} }
   if (S.dirty) await save();
   try {
     const files = [];
@@ -508,9 +519,10 @@ $("#exportBtn").addEventListener("click", async () => {
       download(name, await boardPNG(bid)); files.push(name);
       await new Promise(r => setTimeout(r, 600));
     }
-    toast(`Saved ${files.length} images to your Downloads. Attach them to the email that just opened.`, 9000);
-    const a = document.createElement("a"); a.href = emailLink(files); document.body.appendChild(a); a.click(); a.remove();
-  } catch (er) { console.error(er); toast("Export failed: " + (er?.message || er)); }
+    const url = emailLink(files);
+    if (mail && !mail.closed) { mail.location.href = url; toast(`Saved ${files.length} images to your Downloads. Attach them to the Outlook email in the new tab.`, 9000); }
+    else outlookFallback(url, files.length);
+  } catch (er) { console.error(er); if (mail && !mail.closed) mail.close(); toast("Export failed: " + (er?.message || er)); }
   exporting = false; $("#exportBtn").disabled = false;
 });
 
