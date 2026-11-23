@@ -1,0 +1,377 @@
+{
+ "sundeck": {
+  "items": {
+   "pz-slice": {
+    "name": "BY THE SLICE",
+    "desc": "",
+    "price": "$10.50",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "pz-whole": {
+    "name": "WHOLE PIZZA",
+    "desc": "",
+    "price": "$59.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "pz-gf": {
+    "name": "GLUTEN-FREE INDIVIDUAL PIZZA",
+    "desc": "",
+    "price": "$24.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-tonkotsu": {
+    "name": "TONKOTSU RAMEN",
+    "desc": "Hoisin Pork Belly, Soft Egg, Bean Sprouts,\nSnap Peas, Scallions",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-vegan": {
+    "name": "SUNDECK VEGAN STIR-FRY",
+    "desc": "Fresh Vegetables, Tempeh, Double Black Soy Sauce\nover Rice",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-udon": {
+    "name": "BEEF UDON NOODLE BOWL",
+    "desc": "Spiced Beef Broth, Sliced Prime Rib,\nFresh Vegetables",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-salmon": {
+    "name": "SALMON DONBURI BOWL",
+    "desc": "Fresh Vegetables, Double Black Soy Sauce,\nSesame Sriracha Aioli, Fried Garlic over Rice",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-padthai": {
+    "name": "PAD THAI",
+    "desc": "Choice of Protein, Rice Noodles, Vegetables, Toasted\nPeanuts, Cilantro, Fresh Lime",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-teriyaki": {
+    "name": "CHICKEN TERIYAKI BOWL",
+    "desc": "Marinated Chicken, Fresh Vegetables, Double Black\nSoy Sauce over Rice",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-chicken": {
+    "name": "SUNDECK CHICKEN",
+    "desc": "Broccoli, Carrots, Peppers, Sweet Chili Sauce\nover Rice",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-lomein": {
+    "name": "SUNDECK LO MEIN",
+    "desc": "Yakisoba Noodle, Fresh Vegetables, House Lo Mein\nSauce with Choice of Protein",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-friedrice": {
+    "name": "SUNDECK FRIED RICE",
+    "desc": "Fresh Vegetables, Pickled Carrot and Ginger, Sweet\nDouble Black Soy Sauce, with Choice of Protein",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-curry": {
+    "name": "BANGKOK CHICKEN CURRY",
+    "desc": "Coconut Lemongrass Broth, Fresh Vegetables, Lime,\nSesame Seeds over Rice",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-laab": {
+    "name": "CHILLED PORK LAAB SALAD",
+    "desc": "Marinated Pork, Pickled Cucumber and Onion, Fresh\nRadish, Basil, with Bibb Lettuce Cups",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "wk-special": {
+    "name": "NAME OF DISH",
+    "desc": "Ingredients listed here. Item, Item, Item, Item, Item,\nItem, Item, Item,",
+    "price": "",
+    "special": true,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-bowl": {
+    "name": "BOWL",
+    "desc": "",
+    "price": "$14.25",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-cup": {
+    "name": "CUP",
+    "desc": "",
+    "price": "$8.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-roll": {
+    "name": "BREAD ROLL",
+    "desc": "",
+    "price": "$3.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-potato": {
+    "name": "BAKED POTATO",
+    "desc": "",
+    "price": "$13.00",
+    "special": false,
+    "hidden": false,
+    "opts": [
+     {
+      "name": "Add Chili",
+      "price": "$5.50",
+      "small": true
+     }
+    ]
+   },
+   "sp-cake": {
+    "name": "CAKE",
+    "desc": "",
+    "price": "$9.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-pie": {
+    "name": "PIE SLICE",
+    "desc": "",
+    "price": "$9.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-cinnamon": {
+    "name": "CINNAMON ROLL",
+    "desc": "",
+    "price": "$9.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-bar": {
+    "name": "DESSERT BAR",
+    "desc": "",
+    "price": "$7.50",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-cookie": {
+    "name": "COOKIE",
+    "desc": "",
+    "price": "$7.50",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "sp-fruit": {
+    "name": "WHOLE FRUIT",
+    "desc": "",
+    "price": "$3.50",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g1-double": {
+    "name": "SUNDECK DOUBLE\nCHEESEBURGER",
+    "desc": "American Cheese, Secret Sauce, Lettuce,\nTomato, Red Onion, Pickle, on a Brioche Bun",
+    "price": "$24.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g1-single": {
+    "name": "SINGLE CHEESEBURGER",
+    "desc": "American Cheese, Secret Sauce, Lettuce,\nTomato, Red Onion, Pickle, on a Brioche Bun",
+    "price": "$19.50",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g1-veggie": {
+    "name": "MUSHROOM VEGGIE BURGER",
+    "desc": "Shiitake, Quinoa, and Garbanzo Patty, Slaw,\nCrispy Onions, Sesame Aioli, on a Brioche Bun",
+    "price": "$22.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g1-fries": {
+    "name": "FRENCH FRIES",
+    "desc": "",
+    "price": "",
+    "special": false,
+    "hidden": false,
+    "opts": [
+     {
+      "name": "SIDE",
+      "price": "$6.00",
+      "small": false
+     },
+     {
+      "name": "BASKET",
+      "price": "$10.00",
+      "small": false
+     }
+    ]
+   },
+   "g1-slaw": {
+    "name": "COLESLAW",
+    "desc": "",
+    "price": "$5.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g2-reuben": {
+    "name": "REUBEN",
+    "desc": "Turkey or Beef Pastrami, Gruyere Cheese,\nSauerkraut, Secret Sauce, on Rye",
+    "price": "$22.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g2-banhmi": {
+    "name": "PORK BANH MI",
+    "desc": "Hoisin-Glazed Pork Belly, Sesame Aioli,\nSpicy Pickles, Cilantro, on a Baguette",
+    "price": "$22.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g2-tuna": {
+    "name": "LINE-CAUGHT\nTUNA MELT",
+    "desc": "House-Made Tuna Salad, Cheddar\nCheese, Tomato, on Multigrain Bread",
+    "price": "$22.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g2-chicken": {
+    "name": "GRILLED CHICKEN SANDWICH",
+    "desc": "Grilled Chicken Breast, Aged White Cheddar,\nLettuce, Tomato, Spicy Pepper Jam, on Brioche",
+    "price": "$22.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g3-tenders": {
+    "name": "CHICKEN TENDER BASKET",
+    "desc": "Breaded Chicken with French Fries",
+    "price": "$18.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g3-grilled": {
+    "name": "CLASSIC GRILLED CHEESE",
+    "desc": "With French Fries",
+    "price": "$18.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g3-triple": {
+    "name": "TRIPLE GRILLED CHEESE",
+    "desc": "Provolone, White Cheddar, Ham, and Smoky Onion Jam, on\nParmesan-Crusted Bread with French Fries",
+    "price": "$25.00",
+    "special": true,
+    "hidden": false,
+    "opts": []
+   },
+   "g3-daily": {
+    "name": "GRILL DAILY",
+    "desc": "Sandwich with French Fries",
+    "price": "$25.00",
+    "special": true,
+    "hidden": false,
+    "opts": []
+   },
+   "g3-wagyu": {
+    "name": "WAGYU HOT DOG",
+    "desc": "",
+    "price": "$12.00",
+    "special": false,
+    "hidden": false,
+    "opts": [
+     {
+      "name": "Add Chili",
+      "price": "$6.00",
+      "small": true
+     }
+    ]
+   },
+   "g3-kids": {
+    "name": "KIDS HOT DOG",
+    "desc": "With French Fries",
+    "price": "$12.00",
+    "special": false,
+    "hidden": false,
+    "opts": []
+   },
+   "g3-dip": {
+    "name": "FRENCH DIP",
+    "desc": "Roast Prime Rib, Provolone, Horseradish\nCream, on a Hoagie Roll, with Au Jus and\nFrench Fries",
+    "price": "$25.00",
+    "special": true,
+    "hidden": false,
+    "opts": []
+   }
+  },
+  "wok": {
+   "price": "$24.00",
+   "closed": false,
+   "slots": [
+    "wk-tonkotsu",
+    "wk-udon",
+    "wk-padthai",
+    "wk-vegan",
+    "wk-salmon",
+    "wk-teriyaki"
+   ],
+   "pool": [
+    "wk-chicken",
+    "wk-lomein",
+    "wk-friedrice",
+    "wk-curry",
+    "wk-laab",
+    "wk-special"
+   ]
+  }
+ }
+}
