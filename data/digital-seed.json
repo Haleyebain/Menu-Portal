@@ -208,7 +208,7 @@
     "opts": []
    },
    "g1-double": {
-    "name": "SUNDECK DOUBLE\nCHEESEBURGER",
+    "name": "SUNDECK DOUBLE\nCHEESEBURGER*",
     "desc": "American Cheese, Secret Sauce, Lettuce,\nTomato, Red Onion, Pickle, on a Brioche Bun",
     "price": "$24.00",
     "special": false,
@@ -216,7 +216,7 @@
     "opts": []
    },
    "g1-single": {
-    "name": "SINGLE CHEESEBURGER",
+    "name": "SINGLE CHEESEBURGER*",
     "desc": "American Cheese, Secret Sauce, Lettuce,\nTomato, Red Onion, Pickle, on a Brioche Bun",
     "price": "$19.50",
     "special": false,
