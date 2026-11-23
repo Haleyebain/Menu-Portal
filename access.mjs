@@ -14,6 +14,7 @@ export default async (req) => {
     buckets: meta.buckets.map(id => ({ id, name: BUCKETS[id] })),
     properties: meta.properties.map(id => ({ id, name: PROPERTIES[id] })),
     allProperties: meta.allProperties,
+    perms: meta.perms || [],
   });
 };
 

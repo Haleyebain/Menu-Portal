@@ -13,8 +13,9 @@
  *   F&B Leadership | (a code) | All venues | all | all | TRUE
  *   Sam's Somm     | (a code) | Sam's      | wine-lists, special-menus | sams | TRUE
  *
- *   Buckets:    all, or any of  wine-lists, special-menus, signage
- *   Properties: all, or any of  sams, alpin, cabin, c9, elk, up4, twocreeks, cliffhouse, backyard, catering
+ *   Buckets:    all, or any of  wine-lists, special-menus, signage, digital-menus
+ *               add digital-pricing to let a code change Digital Menus prices ("all" includes it)
+ *   Properties: all, or any of  sams, alpin, cabin, c9, elk, up4, twocreeks, cliffhouse, backyard, catering, sundeck, merrygoround, ullrhof, buttermilk, highalpine
  *   Active:     untick to switch a code off without deleting the row (blank counts as on)
  *
  * Easiest: open the Sheet, Extensions, Apps Script, paste this file. No ID needed.

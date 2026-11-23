@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<title>Digital Menus · Menu Portal</title>
+<meta name="robots" content="noindex,nofollow">
+<script>try { if (!localStorage.getItem("portal_key")) location.replace("login.html?next=" + encodeURIComponent(location.pathname.split("/").pop() || "")); } catch (e) { location.replace("login.html"); }</script>
+<style>
+@font-face{font-family:"SMS Whitney";src:url(assets/fonts/whitney-book.otf) format("opentype");font-weight:400;font-display:swap}
+@font-face{font-family:"SMS Whitney";src:url(assets/fonts/whitney-bold.otf) format("opentype");font-weight:600 700;font-display:swap}
+:root{
+  --bg:#EEF0F2; --panel:#FFFFFF; --panel-2:#F6F7F8; --ink:#1E2730; --muted:#5F6A75; --line:#D6DBE0; --line-2:#E6E9EC;
+  --gold:#F70700; --gold-ink:#FFFFFF; --focus:#2F6FB3; --danger:#B3261E; --danger-bg:#FBEAE9;
+  --stage:#D9DDE1; --chip:#E8ECEF; --ok:#2E7D4F; --drop:#2F6FB3;
+  --ui:"SMS Whitney","Whitney",system-ui,-apple-system,"Segoe UI",sans-serif; --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171C; --panel:#192028; --panel-2:#1E262F; --ink:#E6EAEE; --muted:#9AA5B0; --line:#2E3A45; --line-2:#26303A;
+  --focus:#7FB2EA; --danger:#F2B8B5; --danger-bg:#3A1E1D; --stage:#0D1115; --chip:#26303A; --ok:#7CC79A; --drop:#7FB2EA; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#12171C; --panel:#192028; --panel-2:#1E262F; --ink:#E6EAEE; --muted:#9AA5B0; --line:#2E3A45; --line-2:#26303A;
+  --focus:#7FB2EA; --danger:#F2B8B5; --danger-bg:#3A1E1D; --stage:#0D1115; --chip:#26303A; --ok:#7CC79A; --drop:#7FB2EA; color-scheme:dark }
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:14px/1.4 var(--ui);margin:0}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.app{display:flex;flex-direction:column;height:100%}
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--line);padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:13px}
+.brand span{color:var(--muted);font-size:12px}
+.grow{flex:1}
+select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:6px 8px;min-height:32px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:var(--r);padding:6px 11px;min-height:32px;cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--panel-2)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--gold-ink);font-weight:700}
+.btn svg{width:15px;height:15px}
+.status{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;white-space:nowrap}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block}
+.status.ok i{background:var(--ok)} .status.busy i{background:#C98A00} .status.err i{background:var(--danger)}
+.status.err{color:var(--danger)}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(360px,1fr) minmax(0,1.25fr)}
+.ed{overflow:auto;padding:0 0 40px;border-right:1px solid var(--line);min-width:0}
+.pv{overflow:auto;background:var(--stage);padding:16px;min-width:0}
+@media (max-width: 900px){.main{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}.pv{order:-1;max-height:42vh}.ed{border-right:0}}
+.tabs{display:flex;gap:2px;padding:12px 16px 0;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5;overflow-x:auto}
+.tab{all:unset;cursor:pointer;padding:9px 14px 10px;border-radius:6px 6px 0 0;color:var(--muted);white-space:nowrap;display:flex;flex-direction:column;gap:1px;border-bottom:2px solid transparent}
+.tab b{font-weight:600;color:var(--ink);font-size:13px}
+.tab small{font-size:11px}
+.tab[aria-selected="true"]{border-bottom-color:var(--gold);background:var(--panel-2)}
+.tab:focus-visible{outline:2px solid var(--focus)}
+.wrapin{padding:14px 16px;display:grid;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;min-width:0}
+.card-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid var(--line-2)}
+.card-h b{font-weight:600;letter-spacing:.07em;text-transform:uppercase;font-size:13px;flex:1}
+.card-h small{color:var(--muted);font-size:12px}
+.card-b{padding:8px 12px 12px;display:grid;gap:6px}
+.hint{font-size:12px;color:var(--muted)}
+.banner{border:1px solid var(--danger);background:var(--danger-bg);color:var(--danger);border-radius:8px;padding:10px 12px}
+.banner.info{border-color:var(--line);background:var(--panel);color:var(--ink)}
+.row{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line-2)}
+.row:last-child{border-bottom:0}
+.row.off .nmtxt,.row.off .dstxt,.row.off input,.row.off textarea{opacity:.45;text-decoration:line-through}
+.row .txt{display:grid;gap:3px;min-width:0}
+.nmtxt{font-weight:600;letter-spacing:.04em;white-space:pre-line}
+.dstxt{color:var(--muted);font-size:13px;white-space:pre-line}
+.row textarea,.row input{width:100%;min-width:0;border:1px solid var(--line-2);background:var(--panel);border-radius:5px;padding:5px 7px;min-height:30px;resize:none;overflow:hidden;line-height:18px;display:block}
+.row textarea:focus,.row input:focus{border-color:var(--focus);outline:none}
+.prices{display:grid;gap:4px;justify-items:end}
+.pr-in{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.pr-in input{width:96px;text-align:right}
+.pr-ro{font-variant-numeric:tabular-nums;font-weight:600;padding:5px 0}
+.badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;background:#F0DD90;color:#5a0606;border-radius:3px;padding:1px 5px;margin-right:6px;vertical-align:2px}
+.ib{all:unset;cursor:pointer;width:32px;height:32px;display:grid;place-items:center;border-radius:6px;color:var(--muted)}
+.ib:hover{background:var(--panel-2);color:var(--ink)}
+.ib svg{width:18px;height:18px}
+.ib[aria-pressed="true"]{color:var(--danger)}
+.switch{display:flex;align-items:center;gap:10px;cursor:pointer}
+.switch input{width:18px;height:18px;accent-color:var(--gold)}
+.wokgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width: 520px){.wokgrid{grid-template-columns:1fr}}
+.dcard{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:start;cursor:grab;touch-action:manipulation}
+.dcard .grip{color:var(--muted);padding-top:2px}
+.dcard .grip svg{width:14px;height:14px}
+.dcard.dragging{opacity:.4}
+.dcard.over{outline:2px dashed var(--drop);outline-offset:2px}
+.dcard.picked{outline:2px solid var(--drop);outline-offset:2px}
+.dcard.off .nmtxt,.dcard.off .dstxt{opacity:.45;text-decoration:line-through}
+.dcard .txt{display:grid;gap:3px;min-width:0}
+.dcard textarea{width:100%;border:1px solid var(--line-2);border-radius:5px;padding:4px 6px;resize:none;overflow:hidden;line-height:18px;background:var(--panel)}
+.slotlbl{font-size:11px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin:4px 0 0}
+.pv-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:12px;color:var(--muted)}
+.pv-bar .over{color:var(--danger);font-weight:600}
+.pv-frame{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;box-shadow:0 2px 3px rgba(0,0,0,.08),0 12px 28px rgba(0,0,0,.18);background:#720808}
+.pv-frame .st{transform-origin:top left;position:absolute;left:0;top:0}
+.pv-frame [data-id]{cursor:pointer}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 14px;border-radius:8px;font-size:13px;z-index:50;max-width:90vw}
+.pop{position:absolute;right:0;top:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.18);display:grid;min-width:250px;z-index:20;padding:4px}
+.pop button{all:unset;cursor:pointer;padding:8px 10px;border-radius:6px;display:grid}
+.pop button:hover{background:var(--panel-2)}
+.pop small{color:var(--muted);font-size:12px}
+.menuwrap{position:relative}
+.empty{padding:40px 20px;color:var(--muted);text-align:center}
+#exporthost{position:fixed;left:-30000px;top:0;pointer-events:none}
+
+/* ---------- the board itself: 1920 × 1080, Optima titles and footers are part of the locked art ---------- */
+@font-face{font-family:"DM Avenir";src:url(assets/fonts/avenir-book.ttf) format("truetype");font-weight:400;font-display:block}
+@font-face{font-family:"DM Avenir";src:url(assets/fonts/avenir-medium.ttf) format("truetype");font-weight:500;font-display:block}
+.st{position:relative;width:1920px;height:1080px;overflow:hidden;background:#720808;color:#fff;font-family:"DM Avenir";-webkit-font-smoothing:antialiased}
+.st .art{position:absolute;left:0;top:0;width:1920px;height:1080px;display:block}
+.st .ln{position:absolute;white-space:pre;line-height:1;font-weight:500;letter-spacing:0}
+.st .sm{font-weight:400;letter-spacing:.005em}
+.st .ds{position:absolute;white-space:pre-line;font-weight:400;letter-spacing:.005em}
+/* the gold divider is a drawn bar, as in the design: taller than the type and heavier than a typed | */
+.st .sep{display:inline-block;width:.135em;height:1.04em;background:#F0DD90;vertical-align:-.24em;margin:0 .56em 0 .55em}
+.st .sm .sep{margin:0 .62em 0 .6em}
+.st .pr{color:#F0DD90}
+.st .bdg{position:absolute;width:113px;height:40px;display:block}
+.st .hp{position:absolute;left:0;right:0;text-align:center;color:#F0DD90;line-height:1;font-weight:500;letter-spacing:.01em}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><b>Digital Menus</b><span>Aspen Snowmass</span></div>
+    <label class="sr" for="propSel">Restaurant</label>
+    <select id="propSel" aria-label="Restaurant"></select>
+    <span class="grow"></span>
+    <div class="status" id="status" aria-live="polite"><i></i><span>Connecting…</span></div>
+    <div class="menuwrap">
+      <button class="btn primary" id="exportBtn" title="Downloads all six boards and opens an email to send them">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Export &amp; Send</button>
+    </div>
+  </header>
+  <main class="main">
+    <section class="ed" id="editor" aria-label="Editor"><div class="empty">Loading…</div></section>
+    <section class="pv" aria-label="Preview">
+      <div class="pv-bar"><span id="pvInfo">1920 × 1080</span><span class="over" id="pvOver" hidden>Text runs past its space</span><span class="grow"></span><span>Click an item to jump to it</span></div>
+      <div class="pv-frame" id="pvFrame"></div>
+    </section>
+  </main>
+</div>
+<div id="exporthost"></div>
+<script src="portal.js"></script>
+<script>
+(() => {
+"use strict";
+/* Restaurants with digital boards. More restaurants are added here as their boards are built. */
+const PROPS = [
+  { id: "sundeck", name: "Sundeck", art: "assets/digital/sundeck/", boards: ["pizza", "wok", "soup", "grill1", "grill2", "grill3"] },
+];
+const ART_V = "?v=20261122";
+const GOLD = "#F0DD90";
+/* Layout, measured from the design files (pixels on a 1920 × 1080 board).
+   S name size · nameP name line pitch · ds/dl description size and line pitch ·
+   nd name baseline to first description baseline · gap last baseline to next item's cap top ·
+   optP pitch of option lines (SIDE / BASKET) · addNd pitch of small add-on lines (Add Chili) */
+const BOARDS = {
+  pizza:  { name: "Pizza", file: "Sundeck_Pizza", art: "pizza.png", kind: "rows", S: 56,
+            rows: [{ cap: 495, items: ["pz-slice", "pz-whole"], centers: [522, 1365.5] }, { cap: 764, items: ["pz-gf"], centers: [959.5] }] },
+  wok:    { name: "Wok", file: "Sundeck_Wok", art: "wok.png", kind: "wok", S: 51, nameP: 60, ds: 32, dl: 40, nd: 44.5, gap: 89, optP: 65, addNd: 44, bottom: 960,
+            cap0: [369, 369], cols: [{ x: 158, w: 820 }, { x: 1023, w: 850 }] },
+  soup:   { name: "Soup & Such", file: "Sundeck_Soup_and_Such", art: "soup.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 48, gap: 67, optP: 65, addNd: 48, bottom: 960,
+            cap0: [373, 373], cols: [{ x: 235, w: 740, items: ["sp-bowl", "sp-cup", "sp-roll", "sp-potato"] }, { x: 1040, w: 840, items: ["sp-cake", "sp-pie", "sp-cinnamon", "sp-bar", "sp-cookie", "sp-fruit"] }] },
+  grill1: { name: "Grill 1", file: "Sundeck_Grill_1", art: "grill.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 44, gap: 71.5, optP: 65.5, addNd: 44, bottom: 960, after: { "g1-fries": 17 },
+            cap0: [369, 371], cols: [{ x: 163, w: 1060, items: ["g1-double", "g1-single", "g1-veggie"] }, { x: 1277, w: 610, items: ["g1-fries", "g1-slaw"] }] },
+  grill2: { name: "Grill 2", file: "Sundeck_Grill_2", art: "grill2.png", S: 51, nameP: 55, ds: 32, dl: 40, nd: 46, gap: 70, optP: 65, addNd: 44, bottom: 960,
+            cap0: [372, 368], cols: [{ x: 106, w: 670, items: ["g2-reuben", "g2-banhmi", "g2-tuna"] }, { x: 813, w: 1060, items: ["g2-chicken"], bottom: 525 }] },
+  grill3: { name: "Grill 3", file: "Sundeck_Grill_3", art: "grill.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 44, gap: 60.5, optP: 65, addNd: 43.5, bottom: 960,
+            cap0: [369, 369], cols: [{ x: 100, w: 1030, items: ["g3-tenders", "g3-grilled", "g3-triple", "g3-daily"] }, { x: 1168, w: 720, items: ["g3-wagyu", "g3-kids", "g3-dip"] }] },
+};
+const ICON = {
+  eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7a10 10 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
+  grip: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+};
+const S = { prop: null, board: "pizza", doc: null, seed: null, db: null, canPrice: false, canWrite: true,
+            dirty: false, saving: false, savedAt: 0, serverAt: 0, over: false, picked: null };
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const P = () => PROPS.find(p => p.id === S.prop);
+const items = () => S.doc.items;
+
+/* ================= board layout ================= */
+const baseCache = {};
+/* distance from the top of a line box to its baseline, measured in the page so it matches the browser exactly */
+function baseOff(host, weight, size, lh) {
+  const k = `${weight}/${size}/${lh}`; if (baseCache[k] != null) return baseCache[k];
+  const d = document.createElement("div");
+  d.style.cssText = `position:absolute;left:0;top:0;font:${weight} ${size}px/${lh}px "DM Avenir";white-space:nowrap`;
+  d.innerHTML = `Hx<span style="display:inline-block;width:0;height:0;vertical-align:baseline"></span>`;
+  host.appendChild(d); const v = d.lastChild.getBoundingClientRect().top - d.getBoundingClientRect().top; d.remove();
+  return (baseCache[k] = v);
+}
+function priceHTML(price) { return price ? `<span class="sep" data-bar></span><span class="pr">${esc(price)}</span>` : ""; }
+/* draws one board into a .st element; returns true when something runs past its space */
+function layout(st, bid, live) {
+  const B = BOARDS[bid], d = S.doc, I = d.items, tag = id => live ? ` data-id="${id}"` : "";
+  if (bid === "wok" && d.wok.closed) { st.innerHTML = `<img class="art" alt="" src="${P().art}wok-closed.png${ART_V}">`; return false; }
+  st.innerHTML = `<img class="art" alt="" src="${P().art}${B.art}${ART_V}">` +
+    (bid === "wok" ? `<div class="hp" style="top:0;font-size:59px"${live ? ' data-id="wok-price"' : ""}>${esc(d.wok.price)}</div>` : "");
+  if (bid === "wok") { const h = st.querySelector(".hp"); h.style.top = (313 - baseOff(st, 500, 59, 59)) + "px"; }
+  let over = false;
+  const line = (cls, x, baseline, size, html, id, extra = "") => {
+    const el = document.createElement("div"); el.className = "ln " + cls; el.style.cssText = `left:${x}px;font-size:${size}px;${extra}`;
+    el.innerHTML = html; if (id && live) el.dataset.id = id; st.appendChild(el);
+    el.style.top = (baseline - baseOff(st, cls.includes("sm") ? 400 : 500, size, size)) + "px"; return el;
+  };
+  if (B.kind === "rows") {
+    B.rows.forEach(r => {
+      const vis = r.items.filter(id => !I[id].hidden);
+      const centers = vis.length === r.items.length ? r.centers : vis.length === 1 ? [960] : r.centers;
+      vis.forEach((id, k) => {
+        const it = I[id], el = line("nm", 0, r.cap + 0.708 * B.S, B.S, esc(it.name) + priceHTML(it.price), id);
+        el.style.left = (centers[k] - el.offsetWidth / 2) + "px";
+      });
+    });
+    return false;
+  }
+  const colItems = bid === "wok" ? [d.wok.slots.slice(0, 3), d.wok.slots.slice(3, 6)] : B.cols.map(c => c.items);
+  B.cols.forEach((c, ci) => {
+    const bottom = c.bottom || B.bottom;
+    let cap = B.cap0[ci], last = null;
+    colItems[ci].forEach(id => {
+      const it = I[id]; if (!it || it.hidden) return;
+      let base = cap + 0.708 * B.S, x = c.x;
+      if (it.special) {
+        const b = document.createElement("img"); b.className = "bdg"; b.alt = ""; b.src = P().art + "special-badge.png" + ART_V;
+        b.style.left = x + "px"; b.style.top = cap + "px"; if (live) b.dataset.id = id; st.appendChild(b); x += 124;
+      }
+      const made = [];
+      const names = String(it.name || "").split("\n");
+      names.forEach((nm, k) => made.push(line("nm", k ? c.x : x, base + k * B.nameP, B.S, esc(nm) + (k === 0 ? priceHTML(it.price) : ""), id)));
+      last = base + (names.length - 1) * B.nameP;
+      if (it.desc && it.desc.trim()) {
+        const first = last + B.nd, ds = document.createElement("div");
+        ds.className = "ds"; ds.style.cssText = `left:${c.x}px;width:${c.w}px;font-size:${B.ds}px;line-height:${B.dl}px`;
+        ds.textContent = it.desc; if (live) ds.dataset.id = id; st.appendChild(ds);
+        ds.style.top = (first - baseOff(st, 400, B.ds, B.dl)) + "px";
+        const n = Math.max(1, Math.round(ds.offsetHeight / B.dl));
+        last = first + (n - 1) * B.dl;
+      }
+      (it.opts || []).forEach(o => {
+        if (o.small) { last += B.addNd; made.push(line("sm", c.x, last, B.ds, esc(o.name) + priceHTML(o.price), id)); }
+        else { last += B.optP; made.push(line("nm", c.x, last, B.S, esc(o.name) + priceHTML(o.price), id)); }
+      });
+      if (last + 14 > bottom) over = true;
+      if (made.some(el => el.offsetLeft + el.offsetWidth > c.x + c.w + 4)) over = true;
+      cap = last + B.gap + ((B.after || {})[id] || 0);
+    });
+  });
+  return over;
+}
+
+/* ================= preview ================= */
+function renderPreview() {
+  const fr = $("#pvFrame");
+  fr.innerHTML = `<div class="st"></div>`;
+  const st = fr.firstChild;
+  S.over = layout(st, S.board, true);
+  fitPreview();
+  $("#pvOver").hidden = !S.over;
+  $("#pvInfo").textContent = `${P().name} · ${BOARDS[S.board].name}${S.board === "wok" && S.doc.wok.closed ? " (closed screen)" : ""} · 1920 × 1080`;
+  const ob = $("#overBanner"); if (ob) ob.hidden = !S.over;
+}
+function fitPreview() { const fr = $("#pvFrame"), st = fr.firstChild; if (st) st.style.transform = `scale(${fr.clientWidth / 1920})`; }
+new ResizeObserver(fitPreview).observe(document.getElementById("pvFrame"));
+$("#pvFrame").addEventListener("click", e => {
+  const el = e.target.closest("[data-id]"); if (!el) return;
+  const t = $(`#editor [data-row="${el.dataset.id}"]`); if (!t) return;
+  t.scrollIntoView({ block: "center", behavior: "smooth" });
+  t.animate([{ background: "rgba(240,221,144,.6)" }, { background: "transparent" }], { duration: 1200 });
+});
+
+/* ================= editor ================= */
+const ed = $("#editor");
+function fitTA(t) { t.style.height = "auto"; t.style.height = (t.scrollHeight + 2) + "px"; }
+function priceField(path, value, label, editable) {
+  return editable
+    ? `<label class="pr-in">${esc(label)}<input data-k="${path}" value="${esc(value)}" inputmode="decimal" aria-label="${esc(label)} price"></label>`
+    : (value ? `<span class="pr-ro" title="Prices are set by F&amp;B leadership">${label === "Price" ? "" : `<span class="hint" style="font-weight:400">${esc(label)}</span> `}${esc(value)}</span>` : "");
+}
+function itemText(id, it, special) {
+  const canSpecial = S.canWrite && special;
+  return canSpecial
+    ? `<div class="txt"><div><span class="badge">SPECIAL</span><span class="hint">Today’s special. Type the dish, ingredients and price.</span></div>
+        <textarea rows="1" data-k="items.${id}.name" aria-label="Special name" placeholder="Name of dish">${esc(it.name)}</textarea>
+        <textarea rows="1" data-k="items.${id}.desc" aria-label="Special ingredients" placeholder="Ingredients">${esc(it.desc)}</textarea></div>`
+    : `<div class="txt"><div class="nmtxt">${special ? '<span class="badge">SPECIAL</span>' : ""}${esc(it.name)}</div>${it.desc ? `<div class="dstxt">${esc(it.desc.replace(/\s*\n\s*/g, " "))}</div>` : ""}</div>`;
+}
+function rowHTML(id) {
+  const it = items()[id], editPrice = S.canWrite && (S.canPrice || it.special);
+  const opts = (it.opts || []).map((o, k) => priceField(`items.${id}.opts.${k}.price`, o.price, o.name, S.canWrite && S.canPrice)).join("");
+  return `<div class="row${it.hidden ? " off" : ""}" data-row="${id}">
+    <button class="ib" data-act="hide" data-id="${id}" aria-pressed="${it.hidden}" title="${it.hidden ? "Hidden from the board. Click to show" : "Showing. Click to hide when it’s unavailable"}" aria-label="${it.hidden ? "Show" : "Hide"} ${esc(it.name)}"${S.canWrite ? "" : " disabled"}>${it.hidden ? ICON.eyeOff : ICON.eye}</button>
+    ${itemText(id, it, it.special)}
+    <div class="prices">${priceField(`items.${id}.price`, it.price, "Price", editPrice)}${opts}</div></div>`;
+}
+function dcardHTML(id, where, idx) {
+  const it = items()[id];
+  return `<div class="dcard${it.hidden ? " off" : ""}${S.picked && S.picked.id === id ? " picked" : ""}" draggable="${S.canWrite}" data-row="${id}" data-drag="${id}" data-where="${where}" data-idx="${idx}">
+    <span class="grip" aria-hidden="true">${ICON.grip}</span>${itemText(id, it, it.special)}
+    <button class="ib" data-act="hide" data-id="${id}" aria-pressed="${it.hidden}" title="${it.hidden ? "Hidden. Click to show" : "Click to hide when it’s unavailable"}" aria-label="${it.hidden ? "Show" : "Hide"} ${esc(it.name)}"${S.canWrite ? "" : " disabled"}>${it.hidden ? ICON.eyeOff : ICON.eye}</button></div>`;
+}
+function renderEditor() {
+  if (!S.doc) return;
+  const p = P(), B = BOARDS[S.board], d = S.doc;
+  const tabs = p.boards.map(b => {
+    const n = b === "wok" ? 6 : (BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : BOARDS[b].cols.flatMap(c => c.items)).length;
+    const hid = (b === "wok" ? d.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : BOARDS[b].cols.flatMap(c => c.items)).filter(id => d.items[id]?.hidden).length;
+    const sub = b === "wok" && d.wok.closed ? "Closed screen on" : `${n} items${hid ? ` · ${hid} hidden` : ""}`;
+    return `<button class="tab" role="tab" aria-selected="${b === S.board}" data-act="tab" data-b="${b}"><b>${esc(BOARDS[b].name)}</b><small>${sub}</small></button>`;
+  }).join("");
+  let body = `<div class="banner" id="overBanner"${S.over ? "" : " hidden"}>Text on this board runs past its space. Shorten the special, or hide an item.</div>`;
+  body += `<p class="hint" style="margin:0">${S.canPrice ? "You can show or hide items, edit specials, set prices and change the Wok lineup." : "You can show or hide items, edit specials and change the Wok lineup. Prices are set by F&amp;B leadership."} Changes save automatically. When you’re done, click Export &amp; Send: the six boards download and an email opens to send them.</p>`;
+  if (S.board === "wok") {
+    body += `<section class="card"><div class="card-h"><b>Wok station</b></div><div class="card-b">
+      <label class="switch"><input type="checkbox" data-act="closed"${d.wok.closed ? " checked" : ""}${S.canWrite ? "" : " disabled"}> <span><b>Wok closed</b><br><span class="hint">Shows the Sundeck closed screen (Grill and Pizza arrows) instead of the menu.</span></span></label>
+      <div class="prices" style="justify-items:start">${priceField("wok.price", d.wok.price, "Price for every Wok dish", S.canWrite && S.canPrice)}</div>
+    </div></section>`;
+    const slot = (k) => dcardHTML(d.wok.slots[k], "slots", k);
+    body += `<section class="card"><div class="card-h"><b>On the Wok board</b><small>Drag a rotating item onto a dish to swap them</small></div><div class="card-b">
+      <div class="wokgrid"><div style="display:grid;gap:8px"><p class="slotlbl">Left column</p>${[0, 1, 2].map(slot).join("")}</div>
+      <div style="display:grid;gap:8px"><p class="slotlbl">Right column</p>${[3, 4, 5].map(slot).join("")}</div></div></div></section>`;
+    body += `<section class="card"><div class="card-h"><b>Sundeck Wok rotating items</b><small>Not on the board</small></div><div class="card-b">
+      <div class="wokgrid">${d.wok.pool.map((id, k) => dcardHTML(id, "pool", k)).join("")}</div>
+      <p class="hint" style="margin:4px 0 0">On a touch screen, tap a dish, then tap the dish to swap it with.</p></div></section>`;
+  } else {
+    const groups = B.rows ? B.rows.map((r, i) => ({ label: i ? "Second row" : "Top row", items: r.items })) : B.cols.map((c, i) => ({ label: i ? "Right column" : "Left column", items: c.items }));
+    body += groups.map(g => `<section class="card"><div class="card-h"><b>${g.label}</b></div><div class="card-b">${g.items.map(rowHTML).join("")}</div></section>`).join("");
+  }
+  const scroll = ed.scrollTop;
+  ed.innerHTML = `<div class="tabs" role="tablist" aria-label="${esc(p.name)} boards">${tabs}</div><div class="wrapin">${body}</div>`;
+  ed.querySelectorAll("textarea").forEach(fitTA);
+  ed.scrollTop = scroll;
+}
+function setPath(o, path, v) { const k = path.split("."); for (let i = 0; i < k.length - 1; i++) o = o[k[i]]; o[k[k.length - 1]] = v; }
+ed.addEventListener("input", e => {
+  const t = e.target; if (!t.dataset.k || !S.canWrite) return;
+  if (t.tagName === "TEXTAREA") fitTA(t);
+  setPath(S.doc, t.dataset.k, t.value); changed(false);
+});
+ed.addEventListener("change", e => {
+  const t = e.target;
+  if (t.dataset.act === "closed" && S.canWrite) { S.doc.wok.closed = t.checked; changed(true); }
+});
+function swapCards(a, b) {
+  if (!a || !b || (a.where === b.where && a.idx === b.idx)) return;
+  const w = S.doc.wok, A = w[a.where], Bv = w[b.where];
+  [A[a.idx], Bv[b.idx]] = [Bv[b.idx], A[a.idx]];
+  changed(true);
+}
+ed.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (b && b.dataset.act === "tab") { S.board = b.dataset.b; S.picked = null; try { localStorage.setItem("dm.board", S.board); } catch (er) {} ed.scrollTop = 0; renderEditor(); renderPreview(); return; }
+  if (b && b.dataset.act === "hide" && S.canWrite) { const it = items()[b.dataset.id]; it.hidden = !it.hidden; changed(true); return; }
+  /* tap to swap, for touch screens */
+  const c = e.target.closest(".dcard");
+  if (c && S.canWrite && !e.target.closest("textarea,button")) {
+    const me = { id: c.dataset.drag, where: c.dataset.where, idx: +c.dataset.idx };
+    if (!S.picked) { S.picked = me; renderEditor(); return; }
+    const a = S.picked; S.picked = null;
+    if (a.id === me.id) { renderEditor(); return; }
+    swapCards(a, me); return;
+  }
+});
+let drag = null;
+ed.addEventListener("dragstart", e => {
+  const c = e.target.closest(".dcard"); if (!c || !S.canWrite) return;
+  drag = { id: c.dataset.drag, where: c.dataset.where, idx: +c.dataset.idx };
+  c.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", drag.id);
+});
+ed.addEventListener("dragend", () => { drag = null; ed.querySelectorAll(".dragging,.over").forEach(x => x.classList.remove("dragging", "over")); });
+ed.addEventListener("dragover", e => { const c = e.target.closest(".dcard"); if (!c || !drag) return; e.preventDefault(); ed.querySelectorAll(".over").forEach(x => x !== c && x.classList.remove("over")); c.classList.add("over"); });
+ed.addEventListener("dragleave", e => { const c = e.target.closest(".dcard"); if (c && !c.contains(e.relatedTarget)) c.classList.remove("over"); });
+ed.addEventListener("drop", e => {
+  const c = e.target.closest(".dcard"); if (!c || !drag) return; e.preventDefault();
+  const a = drag; drag = null; swapCards(a, { id: c.dataset.drag, where: c.dataset.where, idx: +c.dataset.idx });
+});
+
+/* ================= saving ================= */
+function setStatus(kind, text) { const el = $("#status"); el.className = "status " + kind; el.querySelector("span").textContent = text; }
+let saveT = 0, pvT = 0;
+function changed(structural) {
+  S.dirty = true; setStatus("busy", "Saving…");
+  if (structural) { renderEditor(); renderPreview(); } else { clearTimeout(pvT); pvT = setTimeout(renderPreview, 150); }
+  clearTimeout(saveT); saveT = setTimeout(save, 700);
+}
+async function save() {
+  if (!S.db || !S.dirty) return;
+  if (S.saving) { clearTimeout(saveT); saveT = setTimeout(save, 400); return; }
+  S.saving = true; S.dirty = false;
+  const body = clone(S.doc); body.updatedAt = Date.now(); body.clientId = S.client;
+  try { await S.db.collection("menus").doc(S.prop).set(body); S.savedAt = body.updatedAt; S.serverAt = body.updatedAt; S.server = clone(body); setStatus("ok", "Saved"); }
+  catch (e) {
+    if (e && e.code === "invalid_argument") {
+      toast("Your access code can’t make that change, so it was undone.", 5000);
+      S.doc = normalize(clone(S.server || S.seed)); renderEditor(); renderPreview(); setStatus("err", "Change not allowed");
+    } else { S.dirty = true; setStatus("err", "Not saved. Retrying…"); clearTimeout(saveT); saveT = setTimeout(save, 4000); }
+  }
+  S.saving = false;
+}
+function normalize(doc) {
+  const seed = S.seed;
+  doc = doc && doc.items && doc.wok ? doc : clone(seed);
+  for (const [id, s] of Object.entries(seed.items)) if (!doc.items[id]) doc.items[id] = clone(s);
+  const all = new Set([...doc.wok.slots, ...doc.wok.pool]);
+  for (const id of [...seed.wok.slots, ...seed.wok.pool]) if (!all.has(id)) doc.wok.pool.push(id);
+  return doc;
+}
+function editingFocused() { const a = document.activeElement; return a && ed.contains(a) && /INPUT|TEXTAREA/.test(a.tagName); }
+function onSnapshot(snap) {
+  const d = snap.docs.find(x => x.id === S.prop); const data = d ? d.data() : null;
+  if (!S.doc) { S.server = data; S.serverAt = data?.updatedAt || 0; S.doc = normalize(clone(data)); renderEditor(); renderPreview(); setStatus("ok", data ? "Up to date" : "Original design"); return; }
+  if (!data || (data.updatedAt || 0) <= S.serverAt) return;
+  S.server = data; S.serverAt = data.updatedAt;
+  if (data.clientId === S.client) return;
+  if (S.dirty || S.saving || editingFocused()) return;   /* the next save carries this person's edits on top */
+  S.doc = normalize(clone(data)); renderEditor(); renderPreview(); setStatus("ok", "Updated by a teammate");
+}
+
+/* ================= export: draws the board into a 1920 × 1080 image ================= */
+function toast(msg, ms = 3200) {
+  let t = $(".toast"); if (!t) { t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+  t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, ms);
+}
+const imgCache = {};
+function loadImg(src) { return imgCache[src] ||= new Promise((ok, bad) => { const i = new Image(); i.onload = () => ok(i); i.onerror = bad; i.src = src; }); }
+async function boardPNG(bid) {
+  await document.fonts.ready;
+  const host = $("#exporthost"); host.innerHTML = `<div class="st"></div>`; const st = host.firstChild;
+  layout(st, bid, false);
+  const cv = document.createElement("canvas"); cv.width = 1920; cv.height = 1080;
+  const ctx = cv.getContext("2d"); const R = st.getBoundingClientRect();
+  ctx.fillStyle = "#720808"; ctx.fillRect(0, 0, 1920, 1080);
+  for (const im of st.querySelectorAll("img")) {
+    const r = im.getBoundingClientRect(), img = await loadImg(im.getAttribute("src"));
+    ctx.drawImage(img, r.left - R.left, r.top - R.top, r.width, r.height);
+  }
+  for (const bar of st.querySelectorAll("[data-bar]")) {
+    const r = bar.getBoundingClientRect(); ctx.fillStyle = getComputedStyle(bar).backgroundColor;
+    ctx.fillRect(r.left - R.left, r.top - R.top, r.width, r.height);
+  }
+  const walker = document.createTreeWalker(st, NodeFilter.SHOW_TEXT), range = document.createRange(), ratio = {};
+  let node;
+  while ((node = walker.nextNode())) {
+    const txt = node.nodeValue; if (!txt.trim()) continue;
+    const cs = getComputedStyle(node.parentElement), w = parseInt(cs.fontWeight, 10), fs = parseFloat(cs.fontSize);
+    if (ratio[w] == null) {   /* where the baseline sits inside a glyph box for this face */
+      const p = document.createElement("div"); p.style.cssText = `position:absolute;left:0;top:0;font:${w} 100px/1 "DM Avenir";white-space:nowrap`;
+      p.innerHTML = `<span>Hxg</span><span style="display:inline-block;width:0;height:0;vertical-align:baseline"></span>`; st.appendChild(p);
+      const rr = document.createRange(); rr.selectNodeContents(p.firstChild); const b = rr.getBoundingClientRect();
+      ratio[w] = (p.lastChild.getBoundingClientRect().bottom - b.top) / b.height; p.remove();
+    }
+    ctx.font = `${w} ${fs}px "DM Avenir"`; ctx.fillStyle = cs.color; ctx.textBaseline = "alphabetic";
+    let off = 0;
+    for (const ch of [...txt]) {
+      if (ch.trim()) {
+        range.setStart(node, off); range.setEnd(node, off + ch.length);
+        const r = range.getClientRects()[0];
+        if (r && r.width) ctx.fillText(ch, r.left - R.left, r.top - R.top + ratio[w] * r.height);
+      }
+      off += ch.length;
+    }
+  }
+  host.innerHTML = "";
+  return await new Promise(ok => cv.toBlob(ok, "image/png"));
+}
+function download(name, blob) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+/* Export & Send: every board as a PNG, then an email to the people who load the screens.
+   An email link can't carry attachments, so the person attaches the six downloaded images. */
+const SEND_TO = ["hbain@aspensnowmass.com", "erudow@aspensnowmass.com", "sjohnson1@aspensnowmass.com"];
+function emailLink(files) {
+  const d = S.doc, I = d.items, now = new Date();
+  const date = `${now.getMonth() + 1}/${now.getDate()}/${String(now.getFullYear()).slice(2)}`;
+  const all = P().boards.flatMap(b => b === "wok" ? d.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : BOARDS[b].cols.flatMap(c => c.items));
+  const hidden = all.filter(id => I[id]?.hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " "));
+  const specials = BOARDS.grill3.cols.flatMap(c => c.items).filter(id => I[id].special && !I[id].hidden).map(id => `${I[id].name.replace(/\s*\n\s*/g, " ")}${I[id].price ? " " + I[id].price : ""}`);
+  const lines = [
+    `Updated ${P().name} menu boards for ${date}, ${files.length} images attached:`, "", ...files.map(f => "  " + f), "",
+    `Wok: ${d.wok.closed ? "closed screen" : d.wok.slots.filter(id => !I[id].hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " ")).join(", ")}`,
+    `Grill 3 specials: ${specials.join(", ") || "none showing"}`,
+    `Hidden today: ${hidden.join(", ") || "nothing"}`,
+  ];
+  return `mailto:${SEND_TO.join(",")}?subject=${encodeURIComponent(`${P().name} digital menus ${date}`)}&body=${encodeURIComponent(lines.join("\n"))}`;
+}
+let exporting = false;
+$("#exportBtn").addEventListener("click", async () => {
+  if (exporting) return; exporting = true; $("#exportBtn").disabled = true;
+  if (S.dirty) await save();
+  try {
+    const files = [];
+    for (const bid of P().boards) {
+      toast(`Building ${BOARDS[bid].name}…`, 20000);
+      const name = BOARDS[bid].file + ".png";
+      download(name, await boardPNG(bid)); files.push(name);
+      await new Promise(r => setTimeout(r, 600));
+    }
+    toast(`Saved ${files.length} images to your Downloads. Attach them to the email that just opened.`, 9000);
+    const a = document.createElement("a"); a.href = emailLink(files); document.body.appendChild(a); a.click(); a.remove();
+  } catch (er) { console.error(er); toast("Export failed: " + (er?.message || er)); }
+  exporting = false; $("#exportBtn").disabled = false;
+});
+
+/* ================= start ================= */
+async function boot() {
+  const who = await PORTAL.gate("digital-menus");
+  PORTAL.bar(who);
+  S.client = Math.random().toString(36).slice(2, 10);
+  S.canPrice = !!(who.ent.perms || []).includes("digital-pricing");
+  const ok = who.ent.allProperties ? null : new Set((who.ent.properties || []).map(p => p.id));
+  for (let i = PROPS.length - 1; i >= 0; i--) if (ok && !ok.has(PROPS[i].id)) PROPS.splice(i, 1);
+  if (!PROPS.length) { ed.innerHTML = `<div class="empty">Your access code doesn’t cover a restaurant with digital boards yet.</div>`; setStatus("err", "No restaurants"); return; }
+  S.prop = PROPS[0].id;
+  $("#propSel").innerHTML = PROPS.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("");
+  try { const b = localStorage.getItem("dm.board"); if (BOARDS[b]) S.board = b; } catch (e) {}
+  let seeds;
+  try { seeds = await (await fetch("data/digital-seed.json", { cache: "no-store" })).json(); }
+  catch (e) { ed.innerHTML = `<div class="empty">The boards didn’t load. Reload the page.</div>`; return; }
+  S.seed = seeds[S.prop];
+  await Promise.all([document.fonts.load('500 51px "DM Avenir"'), document.fonts.load('400 32px "DM Avenir"')]);
+  S.db = PORTAL.db("digital-menus");
+  S.db.collection("menus").onSnapshot(onSnapshot, () => setStatus("err", "Connection lost. Reload the page."));
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && S.dirty) save(); });
+boot();
+})();
+</script>
+</body>
+</html>
