@@ -9,13 +9,15 @@
 //                                "buckets":"all","properties":"all"}}
 // Codes never live in shipped HTML or JS.
 
-export const BUCKETS = { "wine-lists": "Wine Lists", "special-menus": "Special Menus", "signage": "Basic Signage" };
-export const PROPERTIES = { sams: "Sam’s", alpin: "Alpin Room", cabin: "The Cabin", c9: "Cloud Nine", elk: "Elk Camp", up4: "Up 4 Pizza", twocreeks: "Two Creeks Café", cliffhouse: "Cliffhouse", backyard: "Backyard" };
+export const BUCKETS = { "wine-lists": "Wine Lists", "special-menus": "Special Menus", "signage": "Basic Signage", "digital-menus": "Digital Menus" };
+export const PROPERTIES = { sams: "Sam’s", alpin: "Alpin Room", cabin: "The Cabin", c9: "Cloud Nine", elk: "Elk Camp", up4: "Up 4 Pizza", twocreeks: "Two Creeks Café", cliffhouse: "Cliffhouse", backyard: "Backyard", catering: "Catering",
+  sundeck: "Sundeck", merrygoround: "Merry-Go-Round", ullrhof: "Ullrhof", buttermilk: "Buttermilk Mountain Lodge", highalpine: "High Alpine" };
 
 const BUCKET_WORDS = {
   "wine-lists": "wine-lists", "wine-list": "wine-lists", "wine": "wine-lists", "wines": "wine-lists",
   "special-menus": "special-menus", "special-menu": "special-menus", "special": "special-menus", "specials": "special-menus",
   "signage": "signage", "signs": "signage", "sign": "signage", "basic signage": "signage", "basic-signage": "signage",
+  "digital-menus": "digital-menus", "digital menus": "digital-menus", "digital-menu": "digital-menus", "digital": "digital-menus",
 };
 const PROPERTY_WORDS = {
   "sams": "sams", "sam's": "sams", "sam’s": "sams", "sam": "sams",
@@ -27,6 +29,12 @@ const PROPERTY_WORDS = {
   "twocreeks": "twocreeks", "two creeks": "twocreeks", "two-creeks": "twocreeks", "two creeks cafe": "twocreeks", "two creeks café": "twocreeks",
   "cliffhouse": "cliffhouse", "cliff house": "cliffhouse", "cliff-house": "cliffhouse",
   "backyard": "backyard", "back yard": "backyard",
+  "catering": "catering", "asc catering": "catering", "aspen snowmass catering": "catering",
+  "sundeck": "sundeck", "sun deck": "sundeck",
+  "merrygoround": "merrygoround", "merry-go-round": "merrygoround", "merry go round": "merrygoround",
+  "ullrhof": "ullrhof",
+  "buttermilk": "buttermilk", "buttermilk mountain lodge": "buttermilk", "buttermilk lodge": "buttermilk",
+  "highalpine": "highalpine", "high alpine": "highalpine", "high-alpine": "highalpine",
 };
 
 // "all", "none", or a comma list. Unknown words are dropped, never guessed.
@@ -39,6 +47,12 @@ function words(cell, table, everything) {
   return out;
 }
 
+function perms(cell) {
+  const toks = (Array.isArray(cell) ? cell : String(cell || "").split(",")).map(t => String(t).trim().toLowerCase()).filter(Boolean);
+  const all = toks.length === 1 && toks[0] === "all";
+  return all || toks.includes("digital-pricing") || toks.includes("digital pricing") ? ["digital-pricing"] : [];
+}
+
 export function shape(raw, key) {
   const ent = raw.entitlements || raw;
   return {
@@ -47,6 +61,9 @@ export function shape(raw, key) {
     buckets: words(ent.buckets, BUCKET_WORDS, Object.keys(BUCKETS)),
     properties: words(ent.properties, PROPERTY_WORDS, Object.keys(PROPERTIES)),
     allProperties: String(ent.properties || "").trim().toLowerCase() === "all",
+    // Extra permissions ride in the Buckets cell so the Apps Script feed needs no change.
+    // digital-pricing: may change prices on Digital Menus. A Buckets cell of "all" includes it.
+    perms: perms(ent.buckets),
     key,
   };
 }
