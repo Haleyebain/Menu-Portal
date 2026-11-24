@@ -89,6 +89,16 @@ select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:v
 @media (max-width: 520px){.wokgrid{grid-template-columns:1fr}}
 .dcard{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:start;cursor:grab;touch-action:manipulation}
 .dcard .grip{color:var(--muted);padding-top:2px}
+.row.mv{grid-template-columns:18px 32px minmax(0,1fr) auto 32px}
+.row .grip{color:var(--muted);cursor:grab;display:grid;place-items:center;height:32px;touch-action:none}
+.row .grip svg{width:14px;height:14px}
+.row.dragging{opacity:.4}
+.row.picked{outline:2px solid var(--drop);outline-offset:2px;border-radius:6px}
+.colbox{min-height:44px;border-radius:6px}
+.colbox.droppable{outline:2px dashed var(--drop);outline-offset:4px}
+.colbox .empty-col{color:var(--muted);font-size:12px;padding:10px 0;text-align:center}
+.dropline{height:0;border-top:3px solid var(--drop);margin:-2px 0;border-radius:2px;pointer-events:none}
+.ib svg{width:18px;height:18px}
 .dcard .grip svg{width:14px;height:14px}
 .dcard.dragging{opacity:.4}
 .dcard.over{outline:2px dashed var(--drop);outline-offset:2px}
@@ -196,6 +206,7 @@ const BOARDS = {
             cap0: [369, 369], cols: [{ x: 100, w: 1030, items: ["g3-tenders", "g3-grilled", "g3-triple", "g3-daily"] }, { x: 1168, w: 720, items: ["g3-wagyu", "g3-kids", "g3-dip"] }] },
 };
 const ICON = {
+  swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12m0 0-4-4m4 4-4 4M17 17H5m0 0 4-4m-4 4 4 4"/></svg>',
   eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
   eyeOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.9 8.3 2 12 2 12s3.6 7 10 7a10 10 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>',
   grip: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
@@ -207,6 +218,10 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 const clone = o => JSON.parse(JSON.stringify(o));
 const P = () => PROPS.find(p => p.id === S.prop);
 const items = () => S.doc.items;
+/* column boards whose dishes can be moved between the left and right columns */
+const MOVABLE = ["soup", "grill1", "grill2", "grill3"];
+const colsOf = bid => (S.doc && S.doc.cols && S.doc.cols[bid]) || BOARDS[bid].cols.map(c => c.items);
+const boardItems = b => b === "wok" ? S.doc.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : colsOf(b).flat();
 
 /* ================= board layout ================= */
 const baseCache = {};
@@ -244,7 +259,7 @@ function layout(st, bid, live) {
     });
     return false;
   }
-  const colItems = bid === "wok" ? [d.wok.slots.slice(0, 3), d.wok.slots.slice(3, 6)] : B.cols.map(c => c.items);
+  const colItems = bid === "wok" ? [d.wok.slots.slice(0, 3), d.wok.slots.slice(3, 6)] : colsOf(bid);
   B.cols.forEach((c, ci) => {
     const bottom = c.bottom || B.bottom;
     let cap = B.cap0[ci], last = null;
@@ -315,13 +330,15 @@ function itemText(id, it, special) {
         <textarea rows="1" data-k="items.${id}.desc" aria-label="Special ingredients" placeholder="Ingredients">${esc(it.desc)}</textarea></div>`
     : `<div class="txt"><div class="nmtxt">${special ? '<span class="badge">SPECIAL</span>' : ""}${esc(it.name)}</div>${it.desc ? `<div class="dstxt">${esc(it.desc.replace(/\s*\n\s*/g, " "))}</div>` : ""}</div>`;
 }
-function rowHTML(id) {
-  const it = items()[id], editPrice = S.canWrite && (S.canPrice || it.special);
+function rowHTML(id, ci) {
+  const it = items()[id], editPrice = S.canWrite && (S.canPrice || it.special), mv = ci != null && MOVABLE.includes(S.board) && S.canWrite;
   const opts = (it.opts || []).map((o, k) => priceField(`items.${id}.opts.${k}.price`, o.price, o.name, S.canWrite && S.canPrice)).join("");
-  return `<div class="row${it.hidden ? " off" : ""}" data-row="${id}">
+  return `<div class="row${it.hidden ? " off" : ""}${mv ? " mv" : ""}${S.pickedRow === id ? " picked" : ""}" data-row="${id}"${mv ? ` data-col="${ci}"` : ""}>
+    ${mv ? `<span class="grip" draggable="true" data-rowdrag="${id}" title="Drag to move this dish up, down or to the other column" aria-hidden="true">${ICON.grip}</span>` : ""}
     <button class="ib" data-act="hide" data-id="${id}" aria-pressed="${it.hidden}" title="${it.hidden ? "Hidden from the board. Click to show" : "Showing. Click to hide when it’s unavailable"}" aria-label="${it.hidden ? "Show" : "Hide"} ${esc(it.name)}"${S.canWrite ? "" : " disabled"}>${it.hidden ? ICON.eyeOff : ICON.eye}</button>
     ${itemText(id, it, it.special)}
-    <div class="prices">${priceField(`items.${id}.price`, it.price, "Price", editPrice)}${opts}</div></div>`;
+    <div class="prices">${priceField(`items.${id}.price`, it.price, "Price", editPrice)}${opts}</div>${mv ? `
+    <button class="ib" data-act="cross" data-id="${id}" title="Move to the ${ci ? "left" : "right"} column" aria-label="Move ${esc(it.name.replace(/\n/g, " "))} to the ${ci ? "left" : "right"} column">${ICON.swap}</button>` : ""}</div>`;
 }
 function dcardHTML(id, where, idx) {
   const it = items()[id];
@@ -333,13 +350,13 @@ function renderEditor() {
   if (!S.doc) return;
   const p = P(), B = BOARDS[S.board], d = S.doc;
   const tabs = p.boards.map(b => {
-    const n = b === "wok" ? 6 : (BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : BOARDS[b].cols.flatMap(c => c.items)).length;
-    const hid = (b === "wok" ? d.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : BOARDS[b].cols.flatMap(c => c.items)).filter(id => d.items[id]?.hidden).length;
+    const n = b === "wok" ? 6 : boardItems(b).length;
+    const hid = boardItems(b).filter(id => d.items[id]?.hidden).length;
     const sub = b === "wok" && d.wok.closed ? "Closed screen on" : `${n} items${hid ? ` · ${hid} hidden` : ""}`;
     return `<button class="tab" role="tab" aria-selected="${b === S.board}" data-act="tab" data-b="${b}"><b>${esc(BOARDS[b].name)}</b><small>${sub}</small></button>`;
   }).join("");
   let body = `<div class="banner" id="overBanner"${S.over ? "" : " hidden"}>Text on this board runs past its space. Shorten the special, or hide an item.</div>`;
-  body += `<p class="hint" style="margin:0">${S.canPrice ? "You can show or hide items, edit specials, set prices and change the Wok lineup." : "You can show or hide items, edit specials and change the Wok lineup. Prices are set by F&amp;B leadership."} Changes save automatically. When you’re done, click Export &amp; Send: the six boards download and a new email opens in your company Outlook.</p>`;
+  body += `<p class="hint" style="margin:0">${S.canPrice ? "You can show or hide items, move dishes between columns, edit specials, set prices and change the Wok lineup." : "You can show or hide items, move dishes between columns, edit specials and change the Wok lineup. Prices are set by F&amp;B leadership."} Changes save automatically. When you’re done, click Export &amp; Send: the six boards download and a new email opens in your company Outlook.</p>`;
   if (S.board === "wok") {
     body += `<section class="card"><div class="card-h"><b>Wok station</b></div><div class="card-b">
       <label class="switch"><input type="checkbox" data-act="closed"${d.wok.closed ? " checked" : ""}${S.canWrite ? "" : " disabled"}> <span><b>Wok closed</b><br><span class="hint">Shows the Sundeck closed screen (Grill and Pizza arrows) instead of the menu.</span></span></label>
@@ -353,8 +370,12 @@ function renderEditor() {
       <div class="wokgrid">${d.wok.pool.map((id, k) => dcardHTML(id, "pool", k)).join("")}</div>
       <p class="hint" style="margin:4px 0 0">On a touch screen, tap a dish, then tap the dish to swap it with.</p></div></section>`;
   } else {
-    const groups = B.rows ? B.rows.map((r, i) => ({ label: i ? "Second row" : "Top row", items: r.items })) : B.cols.map((c, i) => ({ label: i ? "Right column" : "Left column", items: c.items }));
-    body += groups.map(g => `<section class="card"><div class="card-h"><b>${g.label}</b></div><div class="card-b">${g.items.map(rowHTML).join("")}</div></section>`).join("");
+    if (B.rows) body += B.rows.map((r, i) => `<section class="card"><div class="card-h"><b>${i ? "Second row" : "Top row"}</b></div><div class="card-b">${r.items.map(id => rowHTML(id)).join("")}</div></section>`).join("");
+    else {
+      const mv = MOVABLE.includes(S.board) && S.canWrite;
+      body += colsOf(S.board).map((ids, ci) => `<section class="card"><div class="card-h"><b>${ci ? "Right column" : "Left column"}</b>${mv && ci === 0 ? "<small>Drag the dots to move a dish, or use the arrows to send it across</small>" : ""}</div>
+        <div class="card-b colbox" data-colbox="${ci}">${ids.map(id => rowHTML(id, ci)).join("") || '<div class="empty-col">No dishes here. Drag one in.</div>'}</div></section>`).join("");
+    }
   }
   const scroll = ed.scrollTop;
   ed.innerHTML = `<div class="tabs" role="tablist" aria-label="${esc(p.name)} boards">${tabs}</div><div class="wrapin">${body}</div>`;
@@ -390,6 +411,52 @@ ed.addEventListener("click", e => {
     if (a.id === me.id) { renderEditor(); return; }
     swapCards(a, me); return;
   }
+});
+/* moving dishes within and between the two columns of a board */
+function moveDish(id, toCol, toIdx) {
+  const cols = colsOf(S.board).map(c => c.slice());
+  const from = cols.findIndex(c => c.includes(id)); if (from < 0) return;
+  const fi = cols[from].indexOf(id); cols[from].splice(fi, 1);
+  if (from === toCol && fi < toIdx) toIdx--;
+  cols[toCol].splice(Math.max(0, Math.min(toIdx, cols[toCol].length)), 0, id);
+  (S.doc.cols ||= {})[S.board] = cols; changed(true);
+}
+let rdrag = null;
+function dropSpot(e) {   /* which column, and where in it, the pointer is over */
+  const box = e.target.closest("[data-colbox]"); if (!box) return null;
+  const rows = [...box.querySelectorAll(".row[data-col]")].filter(r => r.dataset.row !== rdrag);
+  let idx = rows.length;
+  for (let k = 0; k < rows.length; k++) { const r = rows[k].getBoundingClientRect(); if (e.clientY < r.top + r.height / 2) { idx = k; break; } }
+  /* index among the column's dishes, counting the dragged one if it sits above */
+  const all = colsOf(S.board)[+box.dataset.colbox], before = rows[idx];
+  const realIdx = before ? all.indexOf(before.dataset.row) : all.length;
+  return { box, col: +box.dataset.colbox, idx: realIdx, before };
+}
+function clearDrop() { ed.querySelectorAll(".dropline").forEach(x => x.remove()); ed.querySelectorAll(".droppable,.row.dragging").forEach(x => x.classList.remove("droppable", "dragging")); }
+ed.addEventListener("dragstart", e => {
+  const g = e.target.closest && e.target.closest("[data-rowdrag]"); if (!g || !S.canWrite) return;
+  rdrag = g.dataset.rowdrag; const row = g.closest(".row");
+  e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", rdrag);
+  try { e.dataTransfer.setDragImage(row, 20, 16); } catch (er) {}
+  setTimeout(() => row.classList.add("dragging"), 0);
+});
+ed.addEventListener("dragover", e => {
+  if (!rdrag) return; const sp = dropSpot(e); if (!sp) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = "move";
+  ed.querySelectorAll(".dropline").forEach(x => x.remove());
+  ed.querySelectorAll(".droppable").forEach(x => x !== sp.box && x.classList.remove("droppable")); sp.box.classList.add("droppable");
+  const line = document.createElement("div"); line.className = "dropline";
+  if (sp.before) sp.box.insertBefore(line, sp.before); else sp.box.appendChild(line);
+});
+ed.addEventListener("drop", e => {
+  if (!rdrag) return; const sp = dropSpot(e); const id = rdrag; rdrag = null; clearDrop();
+  if (!sp) return; e.preventDefault(); moveDish(id, sp.col, sp.idx);
+});
+ed.addEventListener("dragend", () => { if (rdrag) { rdrag = null; clearDrop(); } });
+ed.addEventListener("click", e => {
+  const b = e.target.closest("[data-act=cross]"); if (!b || !S.canWrite) return;
+  const id = b.dataset.id, from = colsOf(S.board).findIndex(c => c.includes(id)), to = from ? 0 : 1;
+  moveDish(id, to, colsOf(S.board)[to].length);
 });
 let drag = null;
 ed.addEventListener("dragstart", e => {
@@ -433,6 +500,17 @@ function normalize(doc) {
   for (const [id, s] of Object.entries(seed.items)) if (!doc.items[id]) doc.items[id] = clone(s);
   const all = new Set([...doc.wok.slots, ...doc.wok.pool]);
   for (const id of [...seed.wok.slots, ...seed.wok.pool]) if (!all.has(id)) doc.wok.pool.push(id);
+  /* column layout: keep the saved order, drop anything that doesn't belong, put new dishes in their usual column */
+  if (doc.cols && typeof doc.cols === "object") {
+    for (const bid of Object.keys(doc.cols)) {
+      if (!MOVABLE.includes(bid)) { delete doc.cols[bid]; continue; }
+      const own = BOARDS[bid].cols.map(c => c.items), mine = new Set(own.flat()), seen = new Set();
+      let cols = Array.isArray(doc.cols[bid]) && doc.cols[bid].length === 2 ? doc.cols[bid] : own.map(c => c.slice());
+      cols = cols.map(c => (Array.isArray(c) ? c : []).filter(id => mine.has(id) && !seen.has(id) && seen.add(id)));
+      own.forEach((c, ci) => c.forEach(id => { if (!seen.has(id)) { cols[ci].push(id); seen.add(id); } }));
+      doc.cols[bid] = cols;
+    }
+  }
   return doc;
 }
 function editingFocused() { const a = document.activeElement; return a && ed.contains(a) && /INPUT|TEXTAREA/.test(a.tagName); }
@@ -504,9 +582,9 @@ const SEND_TO = ["hbain@aspensnowmass.com", "erudow@aspensnowmass.com", "sjohnso
 function emailLink(files) {
   const d = S.doc, I = d.items, now = new Date();
   const date = `${now.getMonth() + 1}/${now.getDate()}/${String(now.getFullYear()).slice(2)}`;
-  const all = P().boards.flatMap(b => b === "wok" ? d.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : BOARDS[b].cols.flatMap(c => c.items));
+  const all = P().boards.flatMap(boardItems);
   const hidden = all.filter(id => I[id]?.hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " "));
-  const specials = BOARDS.grill3.cols.flatMap(c => c.items).filter(id => I[id].special && !I[id].hidden).map(id => `${I[id].name.replace(/\s*\n\s*/g, " ")}${I[id].price ? " " + I[id].price : ""}`);
+  const specials = colsOf("grill3").flat().filter(id => I[id].special && !I[id].hidden).map(id => `${I[id].name.replace(/\s*\n\s*/g, " ")}${I[id].price ? " " + I[id].price : ""}`);
   const lines = [
     `Updated ${P().name} menu boards for ${date}.`, "",
     `Wok: ${d.wok.closed ? "closed screen" : d.wok.slots.filter(id => !I[id].hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " ")).join(", ")}`,
