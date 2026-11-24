@@ -110,6 +110,16 @@ select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:v
 .menuwrap{position:relative}
 .empty{padding:40px 20px;color:var(--muted);text-align:center}
 #exporthost{position:fixed;left:-30000px;top:0;pointer-events:none}
+.xpick{position:absolute;right:0;top:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.18);min-width:260px;z-index:20;padding:12px;display:grid;gap:8px}
+.xpick[hidden]{display:none}
+.xpick h3{margin:0;font-size:13px}
+.xpick .xr{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.xpick .xr input{width:16px;height:16px;margin:0;min-height:0;padding:0}
+.xpick .quick{display:flex;gap:12px;font-size:12px}
+.xpick .quick button{all:unset;cursor:pointer;color:var(--muted);text-decoration:underline}
+.xpick .go{justify-content:center;margin-top:4px}
+.xpick .go:disabled{opacity:.5;cursor:default}
+.hbtns{display:flex;gap:8px}
 
 /* ---------- the board itself: 1920 × 1080, Optima titles and footers are part of the locked art ---------- */
 @font-face{font-family:"DM Avenir";src:url(assets/fonts/avenir-book.ttf) format("truetype");font-weight:400;font-display:block}
@@ -135,7 +145,15 @@ select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:v
     <select id="propSel" aria-label="Restaurant"></select>
     <span class="grow"></span>
     <div class="status" id="status" aria-live="polite"><i></i><span>Connecting…</span></div>
-    <div class="menuwrap">
+    <div class="menuwrap hbtns">
+      <button class="btn" id="exportOnlyBtn" aria-haspopup="true" aria-expanded="false" aria-controls="xpick" title="Choose which boards to download">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Export</button>
+      <div class="xpick" id="xpick" hidden role="dialog" aria-label="Choose boards to export">
+        <h3>Boards to export</h3>
+        <div class="quick"><button type="button" data-x="all">Select all</button><button type="button" data-x="none">Clear</button></div>
+        <div id="xlist"></div>
+        <button class="btn primary go" id="xgo" type="button">Download</button>
+      </div>
       <button class="btn primary" id="exportBtn" title="Downloads all six boards and opens a new email in your company Outlook">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></svg>Export &amp; Send</button>
     </div>
@@ -504,26 +522,58 @@ function outlookFallback(url, n) {   /* the browser blocked the new tab: offer i
   t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 30000);
 }
 let exporting = false;
+/* Export: download only the boards the person ticks, no email */
+const xpick = $("#xpick"), xBtn = $("#exportOnlyBtn");
+function xChecked() { return [...xpick.querySelectorAll("#xlist input:checked")].map(i => i.value); }
+function xSync() { const n = xChecked().length; $("#xgo").disabled = !n; $("#xgo").textContent = n ? `Download ${n} board${n > 1 ? "s" : ""}` : "Pick at least one board"; }
+function xOpen(open) {
+  if (open) {
+    const prev = xpick.dataset.prop === S.prop ? new Set(xChecked()) : null;
+    $("#xlist").innerHTML = P().boards.map(b => `<label class="xr"><input type="checkbox" value="${b}"${!prev || prev.has(b) ? " checked" : ""}>${esc(BOARDS[b].name)}</label>`).join("");
+    xpick.dataset.prop = S.prop; xSync();
+  }
+  xpick.hidden = !open; xBtn.setAttribute("aria-expanded", String(open));
+}
+xBtn.addEventListener("click", e => { e.stopPropagation(); xOpen(xpick.hidden); });
+xpick.addEventListener("click", e => {
+  e.stopPropagation();
+  const q = e.target.closest("[data-x]"); if (q) { xpick.querySelectorAll("#xlist input").forEach(i => i.checked = q.dataset.x === "all"); xSync(); }
+});
+xpick.addEventListener("change", xSync);
+document.addEventListener("click", () => { if (!xpick.hidden) xOpen(false); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !xpick.hidden) { xOpen(false); xBtn.focus(); } });
+async function buildBoards(list) {
+  const files = [];
+  for (const bid of list) {
+    toast(`Building ${BOARDS[bid].name}…`, 20000);
+    const name = BOARDS[bid].file + ".png";
+    download(name, await boardPNG(bid)); files.push(name);
+    await new Promise(r => setTimeout(r, 600));
+  }
+  return files;
+}
+$("#xgo").addEventListener("click", async () => {
+  const list = xChecked(); if (!list.length || exporting) return;
+  xOpen(false); exporting = true; $("#exportBtn").disabled = xBtn.disabled = true;
+  if (S.dirty) await save();
+  try { const files = await buildBoards(list); toast(`Saved ${files.length} image${files.length > 1 ? "s" : ""} to your Downloads.`, 6000); }
+  catch (er) { console.error(er); toast("Export failed: " + (er?.message || er)); }
+  exporting = false; $("#exportBtn").disabled = xBtn.disabled = false;
+});
 $("#exportBtn").addEventListener("click", async () => {
-  if (exporting) return; exporting = true; $("#exportBtn").disabled = true;
+  if (exporting) return; exporting = true; $("#exportBtn").disabled = xBtn.disabled = true;
   /* open the Outlook tab now, while the click still counts, so the browser doesn't block it */
   let mail = null;
   try { mail = window.open("", "_blank"); } catch (e) {}
   if (mail) { try { mail.document.title = "Opening Outlook…"; mail.document.body.innerHTML = '<p style="font:16px system-ui,sans-serif;margin:40px">Building the menu boards. Outlook opens here in a moment.</p>'; } catch (e) {} }
   if (S.dirty) await save();
   try {
-    const files = [];
-    for (const bid of P().boards) {
-      toast(`Building ${BOARDS[bid].name}…`, 20000);
-      const name = BOARDS[bid].file + ".png";
-      download(name, await boardPNG(bid)); files.push(name);
-      await new Promise(r => setTimeout(r, 600));
-    }
+    const files = await buildBoards(P().boards);
     const url = emailLink(files);
     if (mail && !mail.closed) { mail.location.href = url; toast(`Saved ${files.length} images to your Downloads. Attach them to the Outlook email in the new tab.`, 9000); }
     else outlookFallback(url, files.length);
   } catch (er) { console.error(er); if (mail && !mail.closed) mail.close(); toast("Export failed: " + (er?.message || er)); }
-  exporting = false; $("#exportBtn").disabled = false;
+  exporting = false; $("#exportBtn").disabled = xBtn.disabled = false;
 });
 
 /* ================= start ================= */
