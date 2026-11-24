@@ -542,11 +542,13 @@ xpick.addEventListener("click", e => {
 xpick.addEventListener("change", xSync);
 document.addEventListener("click", () => { if (!xpick.hidden) xOpen(false); });
 document.addEventListener("keydown", e => { if (e.key === "Escape" && !xpick.hidden) { xOpen(false); xBtn.focus(); } });
+/* every image is saved as <board name>_<date>, e.g. Sundeck_Wok_11-24-26 */
+function fileDate(d = new Date()) { const z = n => String(n).padStart(2, "0"); return `${z(d.getMonth() + 1)}-${z(d.getDate())}-${String(d.getFullYear()).slice(2)}`; }
 async function buildBoards(list) {
-  const files = [];
+  const files = [], stamp = fileDate();
   for (const bid of list) {
     toast(`Building ${BOARDS[bid].name}…`, 20000);
-    const name = BOARDS[bid].file + ".png";
+    const name = `${BOARDS[bid].file}_${stamp}.png`;
     download(name, await boardPNG(bid)); files.push(name);
     await new Promise(r => setTimeout(r, 600));
   }
