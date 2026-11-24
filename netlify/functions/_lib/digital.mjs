@@ -3,7 +3,8 @@
 //
 //   Every code with the Digital Menus tool: show or hide items, edit items marked
 //   special (name, ingredients, price), swap dishes between the Wok board and the
-//   rotating items, switch the Wok closed screen on or off.
+//   rotating items, switch the Wok closed screen on or off, move dishes up, down
+//   and between the two columns of the Soup and Grill boards.
 //   Codes with digital-pricing: also every price.
 //   Nobody: item names and descriptions that aren't specials, which items exist,
 //   which items are specials.
@@ -11,6 +12,8 @@
 export const DIGITAL_PROPS = ["sundeck", "merrygoround", "ullrhof", "buttermilk", "highalpine"];
 
 const MAX_TEXT = 400;
+// boards whose column layout may be rearranged, and the item-id prefix of the dishes on each
+const MOVABLE = { soup: "sp-", grill1: "g1-", grill2: "g2-", grill3: "g3-" };
 const META = ["updatedAt", "updatedBy", "clientId", "_editor"];
 
 function stable(v) {
@@ -31,6 +34,7 @@ function locked(doc, canPrice) {
     if (canPrice) delete it.price;
     for (const o of Array.isArray(it.opts) ? it.opts : []) if (o && (canPrice || it.special)) delete o.price;
   }
+  delete d.cols;   // column layout is free to change; wellFormed() keeps each dish on its own board
   if (d.wok && typeof d.wok === "object") {
     delete d.wok.closed;
     if (canPrice) delete d.wok.price;
@@ -53,6 +57,16 @@ function wellFormed(doc) {
   if (new Set([...w.slots, ...w.pool]).size !== w.slots.length + w.pool.length) return false;   // no dish twice
   if (![...w.slots, ...w.pool].every(id => doc.items[id])) return false;
   if (w.price != null && (typeof w.price !== "string" || w.price.length > 40)) return false;
+  if (doc.cols != null) {
+    if (typeof doc.cols !== "object" || Array.isArray(doc.cols)) return false;
+    for (const [bid, cols] of Object.entries(doc.cols)) {
+      const pre = MOVABLE[bid]; if (!pre) return false;
+      if (!Array.isArray(cols) || cols.length !== 2 || !cols.every(Array.isArray)) return false;
+      const ids = cols.flat();
+      if (new Set(ids).size !== ids.length) return false;
+      if (!ids.every(id => typeof id === "string" && id.startsWith(pre) && doc.items[id])) return false;
+    }
+  }
   return true;
 }
 
