@@ -71,7 +71,29 @@ function wellFormed(doc) {
   return true;
 }
 
-export function digitalEditAllowed(before, after, canPrice) {
+// When the board design adds, retires or renames dishes, the saved document is brought up to
+// the current seed before comparing, so the first save after a design update is allowed.
+function upgrade(doc, seed) {
+  if (!seed || !doc || !doc.items) return doc;
+  const d = JSON.parse(JSON.stringify(doc));
+  for (const [id, it] of Object.entries(seed.items || {})) if (!d.items[id]) d.items[id] = JSON.parse(JSON.stringify(it));
+  for (const id of Object.keys(d.items)) if (!(seed.items || {})[id]) delete d.items[id];
+  // wording nobody can edit follows the design (same rule as syncSeed() in digital-menus.html)
+  for (const [id, sv] of Object.entries(seed.items || {})) {
+    const t = d.items[id];
+    t.special = !!sv.special; if (sv.badge) t.badge = sv.badge; else delete t.badge;
+    if (!sv.special) { t.name = sv.name; t.desc = sv.desc; }
+    const old = Array.isArray(t.opts) ? t.opts : [];
+    t.opts = (sv.opts || []).map((o, k) => ({ ...o, price: old[k] && old[k].name === o.name && typeof old[k].price === "string" ? old[k].price : o.price }));
+  }
+  if (d.wok && seed.wok) {
+    const have = new Set([...(d.wok.slots || []), ...(d.wok.pool || [])]);
+    for (const id of [...(seed.wok.slots || []), ...(seed.wok.pool || [])]) if (!have.has(id)) (d.wok.pool ||= []).push(id);
+  }
+  return d;
+}
+
+export function digitalEditAllowed(before, after, canPrice, seed) {
   if (!wellFormed(after)) return false;
-  return locked(before, canPrice) === locked(after, canPrice);
+  return locked(upgrade(before, seed), canPrice) === locked(after, canPrice);
 }
