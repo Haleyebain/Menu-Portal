@@ -147,10 +147,10 @@ body.resizing .preview,body.resizing .editor{pointer-events:none}
 .rhead span{padding-left:8px;text-align:left;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rhead .prices span{padding-left:8px}
 .rt{justify-content:flex-end}
-.L-bottle .row,.L-bottle .rhead{grid-template-columns:62px 56px minmax(110px,1.1fr) minmax(120px,1.4fr) minmax(100px,1fr) 58px 52px 70px 86px}
-.L-glass .row,.L-glass .rhead{grid-template-columns:62px minmax(110px,1fr) minmax(110px,1.1fr) minmax(100px,1fr) 58px minmax(170px,1.2fr) 86px}
-.L-simple .row,.L-simple .rhead{grid-template-columns:62px minmax(160px,1fr) 80px 58px}
-.L-cocktail .row,.L-cocktail .rhead{grid-template-columns:62px minmax(130px,.8fr) minmax(180px,1.6fr) 70px 58px}
+.L-bottle .row,.L-bottle .rhead{grid-template-columns:62px 56px minmax(110px,1.1fr) minmax(120px,1.4fr) minmax(100px,1fr) 58px 52px 70px 114px}
+.L-glass .row,.L-glass .rhead{grid-template-columns:62px minmax(110px,1fr) minmax(110px,1.1fr) minmax(100px,1fr) 58px minmax(170px,1.2fr) 114px}
+.L-simple .row,.L-simple .rhead{grid-template-columns:62px minmax(160px,1fr) 80px 86px}
+.L-cocktail .row,.L-cocktail .rhead{grid-template-columns:62px minmax(130px,.8fr) minmax(180px,1.6fr) 70px 86px}
 .prices{display:grid;grid-template-columns:repeat(var(--np),1fr);gap:4px}
 .row textarea{resize:none;overflow:hidden;line-height:18px;display:block;font:inherit}
 .row input,.row textarea{width:100%;min-width:0;border:1px solid var(--line-2);background:var(--panel);border-radius:5px;padding:5px 7px;min-height:30px}
@@ -562,6 +562,7 @@ const FONT_FILES = [
 ];
 const FONT_BYTES = {};
 const ICON = {
+  split: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M4 18h16M4 12h16" stroke-dasharray="2 2.5"/><path d="M19 3v6M16 6h6"/></svg>',
   up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 15 6-6 6 6"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m6 9 6 6 6-6"/></svg>',
   eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -1022,7 +1023,7 @@ $("#pvPages").addEventListener("click", e => {
 });
 
 /* ================= editor ================= */
-function rowHTML(it, list) {
+function rowHTML(it, list, ii = 0) {
   const L = list.layout, ro = S.canWrite ? "" : " readonly";
   const MULTI = { bin: 1, producer: 1, wine: 1, origin: 1, vintage: 1, format: 1 };
   const f = (k, cls = "", ph = "", extra = "") => MULTI[k]
@@ -1032,6 +1033,7 @@ ${esc(it[k])}</textarea>`
   const prices = list.priceLabels.map((lab, pi) => `<input class="num" data-f="price" data-p="${pi}" data-i="${it.id}" value="${esc(it.prices[pi])}" placeholder="${esc(lab)}" aria-label="${esc(lab)} price" inputmode="decimal"${ro}>`).join("");
   const mv = `<div class="lead">${S.canWrite ? `<span class="grip" draggable="true" data-drag="${it.id}" title="Drag to reorder" aria-hidden="true">${ICON.grip}</span>` : ""}<input type="checkbox" class="sel" data-sel="${it.id}"${S.sel.has(it.id) ? " checked" : ""} aria-label="Select to copy"><div class="mv"><button class="ib" data-act="itemUp" data-i="${it.id}" aria-label="Move up">${ICON.up}</button><button class="ib" data-act="itemDown" data-i="${it.id}" aria-label="Move down">${ICON.down}</button></div></div>`;
   const rt = `<div class="rt">
+    ${ii > 0 ? `<button class="ib" data-act="splitHere" data-i="${it.id}" title="Start a new subheading above this ${L === "cocktail" ? "drink" : L === "simple" ? "item" : "wine"}. It and everything below it move under the new subheading" aria-label="Start a new subheading here">${ICON.split}</button>` : ""}
     ${L !== "simple" && L !== "cocktail" && !samsOneLine(L) ? `<button class="ib" data-act="wrap" data-i="${it.id}" aria-pressed="${!!it.wrap}" title="Put the wine name on its own line" aria-label="Wine name on its own line">${ICON.wrap}</button>` : ""}
     <button class="ib" data-act="hide" data-i="${it.id}" aria-pressed="${!!it.hidden}" title="${it.hidden ? "Hidden from print (86'd). Click to show" : "Hide from print (86 it)"}" aria-label="Hide from print">${it.hidden ? ICON.eyeOff : ICON.eye}</button>
     <button class="ib danger" data-act="delItem" data-i="${it.id}" title="Delete" aria-label="Delete wine">${ICON.trash}</button></div>`;
@@ -1116,7 +1118,7 @@ ${esc(g.name)}</textarea>
               <button class="ib" data-act="grpDown" data-g="${g.id}" title="Move subheading down" aria-label="Move subheading down">${ICON.down}</button>
               ${s.groups.length > 1 ? `<button class="ib danger" data-act="delGrp" data-g="${g.id}" title="Delete subheading and its wines" aria-label="Delete subheading">${ICON.trash}</button>` : ""}</div>` : ""}
           </div>
-          <div class="rows">${g.items.length ? headHTML(list) : ""}${g.items.map(it => rowHTML(it, list)).join("")}${g.items.length ? "" : `<div class="empty-g">No wines here yet.</div>`}</div>
+          <div class="rows">${g.items.length ? headHTML(list) : ""}${g.items.map((it, ii) => rowHTML(it, list, ii)).join("")}${g.items.length ? "" : `<div class="empty-g">No wines here yet.</div>`}</div>
           ${S.canWrite ? `<div class="addrow"><button class="btn ghost" data-act="addItem" data-g="${g.id}">${ICON.plus} Add ${list.layout === "simple" ? "item" : list.layout === "cocktail" ? "drink" : "wine"}</button>${S.clip ? `<button class="btn paste" data-act="paste" data-g="${g.id}">Paste ${S.clip.items.length} here</button>` : ""}${gi === s.groups.length - 1 ? `<button class="btn ghost" data-act="addGrp" data-s="${s.id}">${ICON.plus} Add subheading</button>` : ""}</div>` : ""}
         </div>`).join("")}
       </section>`;
@@ -1309,6 +1311,10 @@ ed.addEventListener("click", e => {
     case "secDown": move(list.sections, ix.sections[b.dataset.s], 1); break;
     case "delSec": if (!confirmTwice(b, "s" + b.dataset.s)) return; list.sections.splice(list.sections.indexOf(ix.sections[b.dataset.s]), 1); break;
     case "addGrp": { const s = ix.sections[b.dataset.s]; const g = blankGroup(); s.groups.push(g); setTimeout(() => ed.querySelector(`.grp[data-g="${g.id}"] .gname`)?.focus(), 0); break; }
+    case "splitHere": {   /* a new subheading starts at this wine; it and the wines below it move under it */
+      const [it, g, sx] = ix.items[b.dataset.i]; const at = g.items.indexOf(it); if (at <= 0) return;
+      const ng = blankGroup(); ng.items = g.items.splice(at); sx.groups.splice(sx.groups.indexOf(g) + 1, 0, ng);
+      setTimeout(() => ed.querySelector(`.grp[data-g="${ng.id}"] .gname`)?.focus(), 0); break; }
     case "grpUp": case "grpDown": { const [g, s] = ix.groups[b.dataset.g]; move(s.groups, g, act === "grpUp" ? -1 : 1); break; }
     case "delGrp": { if (!confirmTwice(b, "g" + b.dataset.g)) return; const [g, s] = ix.groups[b.dataset.g]; s.groups.splice(s.groups.indexOf(g), 1); break; }
     case "sortBin": { const [g] = ix.groups[b.dataset.g]; g.items.sort((a, c) => (parseFloat(a.bin) || 1e9) - (parseFloat(c.bin) || 1e9)); break; }

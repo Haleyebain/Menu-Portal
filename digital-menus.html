@@ -144,6 +144,7 @@ select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:v
 .st .sm .sep{margin:0 .62em 0 .6em}
 .st .pr{color:#F0DD90}
 .st .bdg{position:absolute;width:113px;height:40px;display:block}
+.st .cmsg{position:absolute;left:720px;width:480px;text-align:center;white-space:pre-line;text-wrap:balance;color:#F0DD90;font-weight:500;letter-spacing:.01em}
 .st .hp{position:absolute;left:0;right:0;text-align:center;color:#F0DD90;line-height:1;font-weight:500;letter-spacing:.01em}
 </style>
 </head>
@@ -238,7 +239,23 @@ function priceHTML(price) { return price ? `<span class="sep" data-bar></span><s
 /* draws one board into a .st element; returns true when something runs past its space */
 function layout(st, bid, live) {
   const B = BOARDS[bid], d = S.doc, I = d.items, tag = id => live ? ` data-id="${id}"` : "";
-  if (bid === "wok" && d.wok.closed) { st.innerHTML = `<img class="art" alt="" src="${P().art}wok-closed.png${ART_V}">`; return false; }
+  if (bid === "wok" && d.wok.closed) {
+    st.innerHTML = `<img class="art" alt="" src="${P().art}wok-closed.png${ART_V}">`;
+    const msg = String(d.wok.closedText || "").trim();
+    if (msg) {   /* the note between the Grill and Pizza arrows: gold like the arrows, smaller if it needs room */
+      const el = document.createElement("div"); el.className = "cmsg"; el.textContent = msg; if (live) el.dataset.id = "wok-closed-text"; st.appendChild(el);
+      /* one line if it fits at a good size, otherwise balanced lines; shrink until every word fits the 480px space and it stays under 230px tall */
+      const fits = () => el.scrollWidth <= 481 && el.offsetHeight <= 230;
+      const tryAt = (size, oneLine) => { el.style.fontSize = size + "px"; el.style.lineHeight = (size * 1.1) + "px"; el.style.whiteSpace = oneLine ? "pre" : "pre-line"; return fits(); };
+      let fs = 76, ok = false;
+      if (!msg.includes("\n")) for (fs = 76; fs >= 58 && !(ok = tryAt(fs, true)); fs -= 2);
+      if (!ok) for (fs = 76; fs > 28 && !(ok = tryAt(fs, false)); fs -= 2);
+      /* centre the block on the arrow labels' middle line (cap tops 812, baseline 890) */
+      el.style.top = (851 - el.offsetHeight / 2) + "px";
+      return !ok;
+    }
+    return false;
+  }
   st.innerHTML = `<img class="art" alt="" src="${P().art}${B.art}${ART_V}">` +
     (bid === "wok" ? `<div class="hp" style="top:0;font-size:59px"${live ? ' data-id="wok-price"' : ""}>${esc(d.wok.price)}</div>` : "");
   if (bid === "wok") { const h = st.querySelector(".hp"); h.style.top = (313 - baseOff(st, 500, 59, 59)) + "px"; }
@@ -360,6 +377,8 @@ function renderEditor() {
   if (S.board === "wok") {
     body += `<section class="card"><div class="card-h"><b>Wok station</b></div><div class="card-b">
       <label class="switch"><input type="checkbox" data-act="closed"${d.wok.closed ? " checked" : ""}${S.canWrite ? "" : " disabled"}> <span><b>Wok closed</b><br><span class="hint">Shows the Sundeck closed screen (Grill and Pizza arrows) instead of the menu.</span></span></label>
+      <label class="fld" style="display:grid;gap:4px"><span><b>Message on the closed screen</b> <span class="hint">Shows between GRILL and PIZZA. Leave empty for none.</span></span>
+        <textarea rows="2" data-k="wok.closedText" maxlength="120" placeholder="e.g. Reopens tomorrow at 11" aria-label="Message on the Wok closed screen"${S.canWrite ? "" : " readonly"} style="width:100%;border:1px solid var(--line-2);border-radius:5px;padding:6px 8px;resize:none;overflow:hidden;font:inherit">${esc(d.wok.closedText || "")}</textarea></label>
       <div class="prices" style="justify-items:start">${priceField("wok.price", d.wok.price, "Price for every Wok dish", S.canWrite && S.canPrice)}</div>
     </div></section>`;
     const slot = (k) => dcardHTML(d.wok.slots[k], "slots", k);
@@ -500,6 +519,7 @@ function normalize(doc) {
   for (const [id, s] of Object.entries(seed.items)) if (!doc.items[id]) doc.items[id] = clone(s);
   const all = new Set([...doc.wok.slots, ...doc.wok.pool]);
   for (const id of [...seed.wok.slots, ...seed.wok.pool]) if (!all.has(id)) doc.wok.pool.push(id);
+  if (typeof doc.wok.closedText !== "string") doc.wok.closedText = "";
   /* column layout: keep the saved order, drop anything that doesn't belong, put new dishes in their usual column */
   if (doc.cols && typeof doc.cols === "object") {
     for (const bid of Object.keys(doc.cols)) {
@@ -587,7 +607,7 @@ function emailLink(files) {
   const specials = colsOf("grill3").flat().filter(id => I[id].special && !I[id].hidden).map(id => `${I[id].name.replace(/\s*\n\s*/g, " ")}${I[id].price ? " " + I[id].price : ""}`);
   const lines = [
     `Updated ${P().name} menu boards for ${date}.`, "",
-    `Wok: ${d.wok.closed ? "closed screen" : d.wok.slots.filter(id => !I[id].hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " ")).join(", ")}`,
+    `Wok: ${d.wok.closed ? "closed screen" + (d.wok.closedText && d.wok.closedText.trim() ? ` (${d.wok.closedText.trim().replace(/\s*\n\s*/g, " ")})` : "") : d.wok.slots.filter(id => !I[id].hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " ")).join(", ")}`,
     `Grill 3 specials: ${specials.join(", ") || "none showing"}`,
     `Hidden today: ${hidden.join(", ") || "nothing"}`,
   ];
