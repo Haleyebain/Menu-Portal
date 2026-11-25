@@ -142,6 +142,8 @@ select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:v
 /* the gold divider is a drawn bar, as in the design: taller than the type and heavier than a typed | */
 .st .sep{display:inline-block;width:.135em;height:1.04em;background:#F0DD90;vertical-align:-.24em;margin:0 .56em 0 .55em}
 .st .sm .sep{margin:0 .62em 0 .6em}
+/* BOWL | CUP size lines on the soup board: a hairline divider, cap height */
+.st .sm .sep.thin{width:2px;height:.75em;vertical-align:0;margin:0 .41em 0 .4em}
 .st .pr{color:#F0DD90}
 .st .bdg{position:absolute;width:113px;height:40px;display:block}
 .st .cmsg{position:absolute;left:720px;width:480px;text-align:center;white-space:pre-line;text-wrap:balance;color:#F0DD90;font-weight:500;letter-spacing:.01em}
@@ -186,7 +188,7 @@ select,.inp{background:var(--panel);border:1px solid var(--line);border-radius:v
 const PROPS = [
   { id: "sundeck", name: "Sundeck", art: "assets/digital/sundeck/", boards: ["pizza", "wok", "soup", "grill1", "grill2", "grill3"] },
 ];
-const ART_V = "?v=20261123";
+const ART_V = "?v=20261125";
 const GOLD = "#F0DD90";
 /* Layout, measured from the design files (pixels on a 1920 × 1080 board).
    S name size · nameP name line pitch · ds/dl description size and line pitch ·
@@ -194,18 +196,24 @@ const GOLD = "#F0DD90";
    optP pitch of option lines (SIDE / BASKET) · addNd pitch of small add-on lines (Add Chili) */
 const BOARDS = {
   pizza:  { name: "Pizza", file: "Sundeck_Pizza", art: "pizza.png", kind: "rows", S: 56,
-            rows: [{ cap: 495, items: ["pz-slice", "pz-whole"], centers: [522, 1365.5] }, { cap: 764, items: ["pz-gf"], centers: [959.5] }] },
+            /* rowCaps: where the rows sit when 3, 2 or 1 of them have something showing, so a hidden row closes up */
+            rowCaps: { 3: [495, 675, 828], 2: [495, 764], 1: [620] },
+            rows: [{ items: ["pz-slice", "pz-whole"], centers: [522, 1365.5] }, { items: ["pz-calzone"], centers: [962] }, { items: ["pz-gf"], centers: [959.5] }] },
   wok:    { name: "Wok", file: "Sundeck_Wok", art: "wok.png", kind: "wok", S: 51, nameP: 60, ds: 32, dl: 40, nd: 44.5, gap: 89, optP: 65, addNd: 44, bottom: 960,
             cap0: [369, 369], cols: [{ x: 158, w: 820 }, { x: 1023, w: 850 }] },
-  soup:   { name: "Soup & Such", file: "Sundeck_Soup_and_Such", art: "soup.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 48, gap: 67, optP: 65, addNd: 48, bottom: 960,
-            cap0: [373, 373], cols: [{ x: 235, w: 740, items: ["sp-bowl", "sp-cup", "sp-roll", "sp-potato"] }, { x: 1040, w: 840, items: ["sp-cake", "sp-pie", "sp-cinnamon", "sp-bar", "sp-cookie", "sp-fruit"] }] },
+  soup:   { name: "Soup & Such", file: "Sundeck_Soup_and_Such", art: "soup.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 43, gap: 67, gapSub: 45, sizeNd: 41.5, sizeP: 40, optP: 65, addNd: 46, bottom: 975,
+            cap0: [368, 372], cols: [{ x: 218, w: 790, gap: 56, items: ["sp-chili", "sp-sotd", "sp-roll", "sp-potato"] }, { x: 1040, w: 840, items: ["sp-cake", "sp-pie", "sp-cinnamon", "sp-bar", "sp-cookie", "sp-fruit"] }] },
   grill1: { name: "Grill 1", file: "Sundeck_Grill_1", art: "grill.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 44, gap: 71.5, optP: 65.5, addNd: 44, bottom: 960, after: { "g1-fries": 17 },
             cap0: [369, 371], cols: [{ x: 163, w: 1060, items: ["g1-double", "g1-single", "g1-veggie"] }, { x: 1277, w: 610, items: ["g1-fries", "g1-slaw"] }] },
   grill2: { name: "Grill 2", file: "Sundeck_Grill_2", art: "grill2.png", S: 51, nameP: 55, ds: 32, dl: 40, nd: 46, gap: 70, optP: 65, addNd: 44, bottom: 960,
-            cap0: [372, 368], cols: [{ x: 106, w: 670, items: ["g2-reuben", "g2-banhmi", "g2-tuna"] }, { x: 813, w: 1060, items: ["g2-chicken"], bottom: 525 }] },
+            cap0: [372, 368], cols: [{ x: 106, w: 670, items: ["g2-reuben", "g2-banhmi", "g2-tuna"] }, { x: 813, w: 1060, items: ["g2-chicken"], bottom: 525 }],
+            /* prices that sit at a fixed spot in the art: the Kids Meal Box price, divider left edge at x, on baseline */
+            fixed: [{ id: "g2-kidsbox", x: 1349, base: 633, label: "Kids Meal Box" }] },
   grill3: { name: "Grill 3", file: "Sundeck_Grill_3", art: "grill.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 44, gap: 60.5, optP: 65, addNd: 43.5, bottom: 960,
             cap0: [369, 369], cols: [{ x: 100, w: 1030, items: ["g3-tenders", "g3-grilled", "g3-triple", "g3-daily"] }, { x: 1168, w: 720, items: ["g3-wagyu", "g3-kids", "g3-dip"] }] },
 };
+/* the tag in front of a special's name: Grill 3 SPECIAL, soup board SOUP OF THE DAY */
+const BADGES = { special: { src: "special-badge.png", w: 113, h: 40, dx: 124, dy: 0 }, sotd: { src: "sotd-badge.png", w: 257, h: 40, dx: 271, dy: -2 } };
 const ICON = {
   swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12m0 0-4-4m4 4-4 4M17 17H5m0 0 4-4m-4 4 4 4"/></svg>',
   eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
@@ -235,7 +243,7 @@ function baseOff(host, weight, size, lh) {
   host.appendChild(d); const v = d.lastChild.getBoundingClientRect().top - d.getBoundingClientRect().top; d.remove();
   return (baseCache[k] = v);
 }
-function priceHTML(price) { return price ? `<span class="sep" data-bar></span><span class="pr">${esc(price)}</span>` : ""; }
+function priceHTML(price, thin) { return price ? `<span class="sep${thin ? " thin" : ""}" data-bar></span><span class="pr">${esc(price)}</span>` : ""; }
 /* draws one board into a .st element; returns true when something runs past its space */
 function layout(st, bid, live) {
   const B = BOARDS[bid], d = S.doc, I = d.items, tag = id => live ? ` data-id="${id}"` : "";
@@ -266,7 +274,9 @@ function layout(st, bid, live) {
     el.style.top = (baseline - baseOff(st, cls.includes("sm") ? 400 : 500, size, size)) + "px"; return el;
   };
   if (B.kind === "rows") {
-    B.rows.forEach(r => {
+    const shown = B.rows.filter(r => r.items.some(id => I[id] && !I[id].hidden)), caps = B.rowCaps[shown.length] || [];
+    shown.forEach((r, ri) => {
+      r = { ...r, cap: caps[ri] };
       const vis = r.items.filter(id => !I[id].hidden);
       const centers = vis.length === r.items.length ? r.centers : vis.length === 1 ? [960] : r.centers;
       vis.forEach((id, k) => {
@@ -284,8 +294,9 @@ function layout(st, bid, live) {
       const it = I[id]; if (!it || it.hidden) return;
       let base = cap + 0.708 * B.S, x = c.x;
       if (it.special) {
-        const b = document.createElement("img"); b.className = "bdg"; b.alt = ""; b.src = P().art + "special-badge.png" + ART_V;
-        b.style.left = x + "px"; b.style.top = cap + "px"; if (live) b.dataset.id = id; st.appendChild(b); x += 124;
+        const bd = BADGES[it.badge] || BADGES.special;
+        const b = document.createElement("img"); b.className = "bdg"; b.alt = ""; b.src = P().art + bd.src + ART_V;
+        b.style.cssText = `left:${x}px;top:${cap + bd.dy}px;width:${bd.w}px;height:${bd.h}px`; if (live) b.dataset.id = id; st.appendChild(b); x += bd.dx;
       }
       const made = [];
       const names = String(it.name || "").split("\n");
@@ -299,15 +310,23 @@ function layout(st, bid, live) {
         const n = Math.max(1, Math.round(ds.offsetHeight / B.dl));
         last = first + (n - 1) * B.dl;
       }
+      let sub = !!(it.desc && it.desc.trim()), sized = 0;
       (it.opts || []).forEach(o => {
+        sub = true;
+        if (o.size) { last += sized++ ? B.sizeP : (it.desc && it.desc.trim() ? B.sizeNd : B.nd); made.push(line("sm", c.x, last, B.ds, esc(o.name) + priceHTML(o.price, true), id)); return; }
         if (o.small) { last += B.addNd; made.push(line("sm", c.x, last, B.ds, esc(o.name) + priceHTML(o.price), id)); }
         else { last += B.optP; made.push(line("nm", c.x, last, B.S, esc(o.name) + priceHTML(o.price), id)); }
       });
       if (last + 14 > bottom) over = true;
       if (made.some(el => el.offsetLeft + el.offsetWidth > c.x + c.w + 4)) over = true;
-      cap = last + B.gap + ((B.after || {})[id] || 0);
+      cap = last + (sub && B.gapSub != null ? B.gapSub : (c.gap ?? B.gap)) + ((B.after || {})[id] || 0);
     });
   });
+  for (const f of B.fixed || []) {
+    const it = I[f.id]; if (!it || it.hidden || !String(it.price || "").trim()) continue;
+    const el = line("nm", 0, f.base, B.S, priceHTML(it.price), f.id), sep = el.querySelector(".sep");
+    el.style.left = (f.x - sep.offsetLeft) + "px";
+  }
   return over;
 }
 
@@ -340,21 +359,21 @@ function priceField(path, value, label, editable) {
     : (value ? `<span class="pr-ro" title="Prices are set by F&amp;B leadership">${label === "Price" ? "" : `<span class="hint" style="font-weight:400">${esc(label)}</span> `}${esc(value)}</span>` : "");
 }
 function itemText(id, it, special) {
-  const canSpecial = S.canWrite && special;
+  const canSpecial = S.canWrite && special, sotd = it.badge === "sotd", tag = sotd ? "SOUP OF THE DAY" : "SPECIAL";
   return canSpecial
-    ? `<div class="txt"><div><span class="badge">SPECIAL</span><span class="hint">Today’s special. Type the dish, ingredients and price.</span></div>
+    ? `<div class="txt"><div><span class="badge">${tag}</span><span class="hint">${sotd ? "Type today’s soup, its ingredients and the bowl and cup prices." : "Today’s special. Type the dish, ingredients and price."}</span></div>
         <textarea rows="1" data-k="items.${id}.name" aria-label="Special name" placeholder="Name of dish">${esc(it.name)}</textarea>
         <textarea rows="1" data-k="items.${id}.desc" aria-label="Special ingredients" placeholder="Ingredients">${esc(it.desc)}</textarea></div>`
-    : `<div class="txt"><div class="nmtxt">${special ? '<span class="badge">SPECIAL</span>' : ""}${esc(it.name)}</div>${it.desc ? `<div class="dstxt">${esc(it.desc.replace(/\s*\n\s*/g, " "))}</div>` : ""}</div>`;
+    : `<div class="txt"><div class="nmtxt">${special ? `<span class="badge">${it.badge === "sotd" ? "SOUP OF THE DAY" : "SPECIAL"}</span>` : ""}${esc(it.name)}</div>${it.desc ? `<div class="dstxt">${esc(it.desc.replace(/\s*\n\s*/g, " "))}</div>` : ""}</div>`;
 }
 function rowHTML(id, ci) {
   const it = items()[id], editPrice = S.canWrite && (S.canPrice || it.special), mv = ci != null && MOVABLE.includes(S.board) && S.canWrite;
-  const opts = (it.opts || []).map((o, k) => priceField(`items.${id}.opts.${k}.price`, o.price, o.name, S.canWrite && S.canPrice)).join("");
+  const opts = (it.opts || []).map((o, k) => priceField(`items.${id}.opts.${k}.price`, o.price, o.name, S.canWrite && (S.canPrice || it.special))).join("");
   return `<div class="row${it.hidden ? " off" : ""}${mv ? " mv" : ""}${S.pickedRow === id ? " picked" : ""}" data-row="${id}"${mv ? ` data-col="${ci}"` : ""}>
     ${mv ? `<span class="grip" draggable="true" data-rowdrag="${id}" title="Drag to move this dish up, down or to the other column" aria-hidden="true">${ICON.grip}</span>` : ""}
     <button class="ib" data-act="hide" data-id="${id}" aria-pressed="${it.hidden}" title="${it.hidden ? "Hidden from the board. Click to show" : "Showing. Click to hide when it’s unavailable"}" aria-label="${it.hidden ? "Show" : "Hide"} ${esc(it.name)}"${S.canWrite ? "" : " disabled"}>${it.hidden ? ICON.eyeOff : ICON.eye}</button>
     ${itemText(id, it, it.special)}
-    <div class="prices">${priceField(`items.${id}.price`, it.price, "Price", editPrice)}${opts}</div>${mv ? `
+    <div class="prices">${(it.opts || []).some(x => x.size) && !it.price ? "" : priceField(`items.${id}.price`, it.price, "Price", editPrice)}${opts}</div>${mv ? `
     <button class="ib" data-act="cross" data-id="${id}" title="Move to the ${ci ? "left" : "right"} column" aria-label="Move ${esc(it.name.replace(/\n/g, " "))} to the ${ci ? "left" : "right"} column">${ICON.swap}</button>` : ""}</div>`;
 }
 function dcardHTML(id, where, idx) {
@@ -394,6 +413,12 @@ function renderEditor() {
       const mv = MOVABLE.includes(S.board) && S.canWrite;
       body += colsOf(S.board).map((ids, ci) => `<section class="card"><div class="card-h"><b>${ci ? "Right column" : "Left column"}</b>${mv && ci === 0 ? "<small>Drag the dots to move a dish, or use the arrows to send it across</small>" : ""}</div>
         <div class="card-b colbox" data-colbox="${ci}">${ids.map(id => rowHTML(id, ci)).join("") || '<div class="empty-col">No dishes here. Drag one in.</div>'}</div></section>`).join("");
+      for (const f of B.fixed || []) {
+        const it = d.items[f.id]; if (!it) continue;
+        body += `<section class="card"><div class="card-h"><b>${esc(f.label)}</b><small>The box itself is part of the board design</small></div><div class="card-b">
+          <div class="row" data-row="${f.id}" style="grid-template-columns:minmax(0,1fr) auto"><div class="txt"><div class="nmtxt">${esc(it.name)}</div></div>
+          <div class="prices">${priceField(`items.${f.id}.price`, it.price, "Price", S.canWrite && S.canPrice)}</div></div></div></section>`;
+      }
     }
   }
   const scroll = ed.scrollTop;
@@ -513,10 +538,25 @@ async function save() {
   }
   S.saving = false;
 }
+/* Wording nobody can edit (names and descriptions of regular dishes, option names, which dishes are
+   specials) always follows the current design; prices, specials' text and hiding stay as saved.
+   Same rule as upgrade() in netlify/functions/_lib/digital.mjs. */
+function syncSeed(doc, seed) {
+  for (const [id, sv] of Object.entries(seed.items)) {
+    const t = doc.items[id]; if (!t) continue;
+    t.special = !!sv.special; if (sv.badge) t.badge = sv.badge; else delete t.badge;
+    if (!sv.special) { t.name = sv.name; t.desc = sv.desc; }
+    const old = Array.isArray(t.opts) ? t.opts : [];
+    t.opts = (sv.opts || []).map((o, k) => ({ ...o, price: old[k] && old[k].name === o.name && typeof old[k].price === "string" ? old[k].price : o.price }));
+  }
+  return doc;
+}
 function normalize(doc) {
   const seed = S.seed;
   doc = doc && doc.items && doc.wok ? doc : clone(seed);
   for (const [id, s] of Object.entries(seed.items)) if (!doc.items[id]) doc.items[id] = clone(s);
+  for (const id of Object.keys(doc.items)) if (!seed.items[id]) delete doc.items[id];   /* dishes retired from the design */
+  syncSeed(doc, seed);
   const all = new Set([...doc.wok.slots, ...doc.wok.pool]);
   for (const id of [...seed.wok.slots, ...seed.wok.pool]) if (!all.has(id)) doc.wok.pool.push(id);
   if (typeof doc.wok.closedText !== "string") doc.wok.closedText = "";
@@ -527,7 +567,12 @@ function normalize(doc) {
       const own = BOARDS[bid].cols.map(c => c.items), mine = new Set(own.flat()), seen = new Set();
       let cols = Array.isArray(doc.cols[bid]) && doc.cols[bid].length === 2 ? doc.cols[bid] : own.map(c => c.slice());
       cols = cols.map(c => (Array.isArray(c) ? c : []).filter(id => mine.has(id) && !seen.has(id) && seen.add(id)));
-      own.forEach((c, ci) => c.forEach(id => { if (!seen.has(id)) { cols[ci].push(id); seen.add(id); } }));
+      /* a dish new to the design goes in its usual column, just above the dish that follows it there */
+      own.forEach((c, ci) => c.forEach((id, j) => {
+        if (seen.has(id)) return;
+        const next = c.slice(j + 1).find(n => cols[ci].includes(n));
+        next ? cols[ci].splice(cols[ci].indexOf(next), 0, id) : cols[ci].push(id); seen.add(id);
+      }));
       doc.cols[bid] = cols;
     }
   }
@@ -609,6 +654,7 @@ function emailLink(files) {
     `Updated ${P().name} menu boards for ${date}.`, "",
     `Wok: ${d.wok.closed ? "closed screen" + (d.wok.closedText && d.wok.closedText.trim() ? ` (${d.wok.closedText.trim().replace(/\s*\n\s*/g, " ")})` : "") : d.wok.slots.filter(id => !I[id].hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " ")).join(", ")}`,
     `Grill 3 specials: ${specials.join(", ") || "none showing"}`,
+    ...(I["sp-sotd"] ? [`Soup of the day: ${I["sp-sotd"].hidden ? "hidden" : I["sp-sotd"].name.replace(/\s*\n\s*/g, " ")}`] : []),
     `Hidden today: ${hidden.join(", ") || "nothing"}`,
   ];
   return "https://outlook.office.com/mail/deeplink/compose?to=" + encodeURIComponent(SEND_TO.join(";")) +
