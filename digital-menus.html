@@ -202,7 +202,8 @@ const BOARDS = {
   wok:    { name: "Wok", file: "Sundeck_Wok", art: "wok.png", kind: "wok", S: 51, nameP: 60, ds: 32, dl: 40, nd: 44.5, gap: 89, optP: 65, addNd: 44, bottom: 960,
             cap0: [369, 369], cols: [{ x: 158, w: 820 }, { x: 1023, w: 850 }] },
   soup:   { name: "Soup & Such", file: "Sundeck_Soup_and_Such", art: "soup.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 43, gap: 67, gapSub: 45, sizeNd: 41.5, sizeP: 40, optP: 65, addNd: 46, bottom: 975,
-            cap0: [368, 372], cols: [{ x: 218, w: 790, gap: 56, items: ["sp-chili", "sp-sotd", "sp-roll", "sp-potato"] }, { x: 1040, w: 840, items: ["sp-cake", "sp-pie", "sp-cinnamon", "sp-bar", "sp-cookie", "sp-fruit"] }] },
+            cap0: [368, 372], cols: [{ x: 218, w: 790, gap: 56, items: ["sp-chili", "sp-sotd", "sp-roll", "sp-potato"] }, { x: 1040, w: 840, items: ["sp-cake", "sp-pie", "sp-cinnamon", "sp-bar", "sp-cookie", "sp-fruit"] }],
+            tray: ["sp-sotd2"] },   /* dishes ready to drag onto the board */
   grill1: { name: "Grill 1", file: "Sundeck_Grill_1", art: "grill.png", S: 51, nameP: 60, ds: 32, dl: 40, nd: 44, gap: 71.5, optP: 65.5, addNd: 44, bottom: 960, after: { "g1-fries": 17 },
             cap0: [369, 371], cols: [{ x: 163, w: 1060, items: ["g1-double", "g1-single", "g1-veggie"] }, { x: 1277, w: 610, items: ["g1-fries", "g1-slaw"] }] },
   grill2: { name: "Grill 2", file: "Sundeck_Grill_2", art: "grill2.png", S: 51, nameP: 55, ds: 32, dl: 40, nd: 46, gap: 70, optP: 65, addNd: 44, bottom: 960,
@@ -229,8 +230,10 @@ const P = () => PROPS.find(p => p.id === S.prop);
 const items = () => S.doc.items;
 /* column boards whose dishes can be moved between the left and right columns */
 const MOVABLE = ["soup", "grill1", "grill2", "grill3"];
-const colsOf = bid => (S.doc && S.doc.cols && S.doc.cols[bid]) || BOARDS[bid].cols.map(c => c.items);
-const boardItems = b => b === "wok" ? S.doc.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : colsOf(b).flat();
+/* [left, right] plus, on boards with a tray, [not on the board] */
+const defaultCols = bid => [...BOARDS[bid].cols.map(c => c.items), ...(BOARDS[bid].tray ? [BOARDS[bid].tray] : [])];
+const colsOf = bid => (S.doc && S.doc.cols && S.doc.cols[bid]) || defaultCols(bid);
+const boardItems = b => b === "wok" ? S.doc.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : colsOf(b).slice(0, 2).flat();
 
 /* ================= board layout ================= */
 const baseCache = {};
@@ -287,7 +290,17 @@ function layout(st, bid, live) {
     return false;
   }
   const colItems = bid === "wok" ? [d.wok.slots.slice(0, 3), d.wok.slots.slice(3, 6)] : colsOf(bid);
+  const drawn = { over: false };
   B.cols.forEach((c, ci) => {
+    /* if a column runs a little long, tighten the space between dishes (down to 70%);
+       if even that doesn't fit, keep the designed spacing and warn so someone hides a dish */
+    const mark = st.children.length, clear = () => { while (st.children.length > mark) st.lastChild.remove(); };
+    let fit = !drawCol(c, ci, 1);
+    for (let k = 0.9; !fit && k >= 0.7; k = Math.round((k - 0.1) * 10) / 10) { clear(); fit = !drawCol(c, ci, k); }
+    if (!fit) { clear(); drawCol(c, ci, 1); over = true; }
+  });
+  function drawCol(c, ci, k) {
+    drawn.over = false;
     const bottom = c.bottom || B.bottom;
     let cap = B.cap0[ci], last = null;
     colItems[ci].forEach(id => {
@@ -300,7 +313,16 @@ function layout(st, bid, live) {
       }
       const made = [];
       const names = String(it.name || "").split("\n");
-      names.forEach((nm, k) => made.push(line("nm", k ? c.x : x, base + k * B.nameP, B.S, esc(nm) + (k === 0 ? priceHTML(it.price) : ""), id)));
+      names.forEach((nm, k) => {
+        const el = line("nm", k ? c.x : x, base + k * B.nameP, B.S, esc(nm) + (k === 0 ? priceHTML(it.price) : ""), id);
+        /* a long special name shrinks to fit its column (down to 80%), keeping its baseline */
+        const room = c.x + c.w - el.offsetLeft;
+        if (it.special && el.offsetWidth > room) {
+          const fs = Math.max(B.S * 0.8, Math.floor(B.S * room / el.offsetWidth)), bl = base + k * B.nameP;
+          el.style.fontSize = fs + "px"; el.style.top = (bl - baseOff(st, 500, fs, fs)) + "px";
+        }
+        made.push(el);
+      });
       last = base + (names.length - 1) * B.nameP;
       if (it.desc && it.desc.trim()) {
         const first = last + B.nd, ds = document.createElement("div");
@@ -317,11 +339,12 @@ function layout(st, bid, live) {
         if (o.small) { last += B.addNd; made.push(line("sm", c.x, last, B.ds, esc(o.name) + priceHTML(o.price), id)); }
         else { last += B.optP; made.push(line("nm", c.x, last, B.S, esc(o.name) + priceHTML(o.price), id)); }
       });
-      if (last + 14 > bottom) over = true;
-      if (made.some(el => el.offsetLeft + el.offsetWidth > c.x + c.w + 4)) over = true;
-      cap = last + (sub && B.gapSub != null ? B.gapSub : (c.gap ?? B.gap)) + ((B.after || {})[id] || 0);
+      if (last + 14 > bottom) drawn.over = true;
+      if (made.some(el => el.offsetLeft + el.offsetWidth > c.x + c.w + 4)) drawn.over = true;
+      cap = last + k * (sub && B.gapSub != null ? B.gapSub : (c.gap ?? B.gap)) + ((B.after || {})[id] || 0);
     });
-  });
+    return drawn.over;
+  }
   for (const f of B.fixed || []) {
     const it = I[f.id]; if (!it || it.hidden || !String(it.price || "").trim()) continue;
     const el = line("nm", 0, f.base, B.S, priceHTML(it.price), f.id), sep = el.querySelector(".sep");
@@ -374,7 +397,7 @@ function rowHTML(id, ci) {
     <button class="ib" data-act="hide" data-id="${id}" aria-pressed="${it.hidden}" title="${it.hidden ? "Hidden from the board. Click to show" : "Showing. Click to hide when it’s unavailable"}" aria-label="${it.hidden ? "Show" : "Hide"} ${esc(it.name)}"${S.canWrite ? "" : " disabled"}>${it.hidden ? ICON.eyeOff : ICON.eye}</button>
     ${itemText(id, it, it.special)}
     <div class="prices">${(it.opts || []).some(x => x.size) && !it.price ? "" : priceField(`items.${id}.price`, it.price, "Price", editPrice)}${opts}</div>${mv ? `
-    <button class="ib" data-act="cross" data-id="${id}" title="Move to the ${ci ? "left" : "right"} column" aria-label="Move ${esc(it.name.replace(/\n/g, " "))} to the ${ci ? "left" : "right"} column">${ICON.swap}</button>` : ""}</div>`;
+    <button class="ib" data-act="cross" data-id="${id}" title="${ci === 2 ? "Add to the board, at the bottom of the left column" : `Move to the ${ci ? "left" : "right"} column`}" aria-label="${ci === 2 ? `Add ${esc(it.name.replace(/\n/g, " "))} to the board` : `Move ${esc(it.name.replace(/\n/g, " "))} to the ${ci ? "left" : "right"} column`}">${ICON.swap}</button>` : ""}</div>`;
 }
 function dcardHTML(id, where, idx) {
   const it = items()[id];
@@ -411,8 +434,8 @@ function renderEditor() {
     if (B.rows) body += B.rows.map((r, i) => `<section class="card"><div class="card-h"><b>${i ? "Second row" : "Top row"}</b></div><div class="card-b">${r.items.map(id => rowHTML(id)).join("")}</div></section>`).join("");
     else {
       const mv = MOVABLE.includes(S.board) && S.canWrite;
-      body += colsOf(S.board).map((ids, ci) => `<section class="card"><div class="card-h"><b>${ci ? "Right column" : "Left column"}</b>${mv && ci === 0 ? "<small>Drag the dots to move a dish, or use the arrows to send it across</small>" : ""}</div>
-        <div class="card-b colbox" data-colbox="${ci}">${ids.map(id => rowHTML(id, ci)).join("") || '<div class="empty-col">No dishes here. Drag one in.</div>'}</div></section>`).join("");
+      body += colsOf(S.board).map((ids, ci) => `<section class="card"><div class="card-h"><b>${["Left column", "Right column", "Not on the board"][ci]}</b>${mv && ci === 0 ? "<small>Drag the dots to move a dish, or use the arrows to send it across</small>" : ci === 2 ? "<small>Drag a dish onto a column to add it to the board</small>" : ""}</div>
+        <div class="card-b colbox" data-colbox="${ci}">${ids.map(id => rowHTML(id, ci)).join("") || `<div class="empty-col">${ci === 2 ? "Nothing waiting. Drag a dish here to take it off the board." : "No dishes here. Drag one in."}</div>`}</div></section>`).join("");
       for (const f of B.fixed || []) {
         const it = d.items[f.id]; if (!it) continue;
         body += `<section class="card"><div class="card-h"><b>${esc(f.label)}</b><small>The box itself is part of the board design</small></div><div class="card-b">
@@ -499,7 +522,7 @@ ed.addEventListener("drop", e => {
 ed.addEventListener("dragend", () => { if (rdrag) { rdrag = null; clearDrop(); } });
 ed.addEventListener("click", e => {
   const b = e.target.closest("[data-act=cross]"); if (!b || !S.canWrite) return;
-  const id = b.dataset.id, from = colsOf(S.board).findIndex(c => c.includes(id)), to = from ? 0 : 1;
+  const id = b.dataset.id, from = colsOf(S.board).findIndex(c => c.includes(id)), to = from === 0 ? 1 : 0;
   moveDish(id, to, colsOf(S.board)[to].length);
 });
 let drag = null;
@@ -564,8 +587,8 @@ function normalize(doc) {
   if (doc.cols && typeof doc.cols === "object") {
     for (const bid of Object.keys(doc.cols)) {
       if (!MOVABLE.includes(bid)) { delete doc.cols[bid]; continue; }
-      const own = BOARDS[bid].cols.map(c => c.items), mine = new Set(own.flat()), seen = new Set();
-      let cols = Array.isArray(doc.cols[bid]) && doc.cols[bid].length === 2 ? doc.cols[bid] : own.map(c => c.slice());
+      const own = defaultCols(bid), mine = new Set(own.flat()), seen = new Set(), saved = doc.cols[bid];
+      let cols = Array.isArray(saved) && saved.length >= 2 ? own.map((c, i) => saved[i] || []) : own.map(c => c.slice());
       cols = cols.map(c => (Array.isArray(c) ? c : []).filter(id => mine.has(id) && !seen.has(id) && seen.add(id)));
       /* a dish new to the design goes in its usual column, just above the dish that follows it there */
       own.forEach((c, ci) => c.forEach((id, j) => {
@@ -654,7 +677,7 @@ function emailLink(files) {
     `Updated ${P().name} menu boards for ${date}.`, "",
     `Wok: ${d.wok.closed ? "closed screen" + (d.wok.closedText && d.wok.closedText.trim() ? ` (${d.wok.closedText.trim().replace(/\s*\n\s*/g, " ")})` : "") : d.wok.slots.filter(id => !I[id].hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " ")).join(", ")}`,
     `Grill 3 specials: ${specials.join(", ") || "none showing"}`,
-    ...(I["sp-sotd"] ? [`Soup of the day: ${I["sp-sotd"].hidden ? "hidden" : I["sp-sotd"].name.replace(/\s*\n\s*/g, " ")}`] : []),
+    ...(P().boards.includes("soup") ? [`Soups of the day: ${boardItems("soup").filter(id => I[id]?.badge === "sotd" && !I[id].hidden).map(id => I[id].name.replace(/\s*\n\s*/g, " ")).join(", ") || "none showing"}`] : []),
     `Hidden today: ${hidden.join(", ") || "nothing"}`,
   ];
   return "https://outlook.office.com/mail/deeplink/compose?to=" + encodeURIComponent(SEND_TO.join(";")) +
