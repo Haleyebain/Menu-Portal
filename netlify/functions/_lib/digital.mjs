@@ -62,7 +62,7 @@ function wellFormed(doc) {
     if (typeof doc.cols !== "object" || Array.isArray(doc.cols)) return false;
     for (const [bid, cols] of Object.entries(doc.cols)) {
       const pre = MOVABLE[bid]; if (!pre) return false;
-      if (!Array.isArray(cols) || cols.length !== 2 || !cols.every(Array.isArray)) return false;
+      if (!Array.isArray(cols) || cols.length < 2 || cols.length > 3 || !cols.every(Array.isArray)) return false;   // left, right, and the "not on the board" tray
       const ids = cols.flat();
       if (new Set(ids).size !== ids.length) return false;
       if (!ids.every(id => typeof id === "string" && id.startsWith(pre) && doc.items[id])) return false;
