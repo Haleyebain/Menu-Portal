@@ -168,6 +168,26 @@
           }
         ]
       },
+      "sp-sotd2": {
+        "name": "NAME OF DISH",
+        "desc": "Ingredients listed here.",
+        "price": "",
+        "special": true,
+        "badge": "sotd",
+        "hidden": false,
+        "opts": [
+          {
+            "name": "BOWL",
+            "price": "$14.25",
+            "size": true
+          },
+          {
+            "name": "CUP",
+            "price": "$8.00",
+            "size": true
+          }
+        ]
+      },
       "sp-roll": {
         "name": "BREAD ROLL",
         "desc": "",
