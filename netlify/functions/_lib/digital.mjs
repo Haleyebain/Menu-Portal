@@ -3,7 +3,7 @@
 //
 //   Every code with the Digital Menus tool: show or hide items, edit items marked
 //   special (name, ingredients, price), swap dishes between the Wok board and the
-//   rotating items, switch the Wok closed screen on or off, move dishes up, down
+//   rotating items, switch the Wok closed screen on or off and write its message, move dishes up, down
 //   and between the two columns of the Soup and Grill boards.
 //   Codes with digital-pricing: also every price.
 //   Nobody: item names and descriptions that aren't specials, which items exist,
@@ -36,7 +36,7 @@ function locked(doc, canPrice) {
   }
   delete d.cols;   // column layout is free to change; wellFormed() keeps each dish on its own board
   if (d.wok && typeof d.wok === "object") {
-    delete d.wok.closed;
+    delete d.wok.closed; delete d.wok.closedText;
     if (canPrice) delete d.wok.price;
     d.wok.dishes = [...(d.wok.slots || []), ...(d.wok.pool || [])].map(String).sort();
     d.wok.slotCount = (d.wok.slots || []).length;
@@ -57,6 +57,7 @@ function wellFormed(doc) {
   if (new Set([...w.slots, ...w.pool]).size !== w.slots.length + w.pool.length) return false;   // no dish twice
   if (![...w.slots, ...w.pool].every(id => doc.items[id])) return false;
   if (w.price != null && (typeof w.price !== "string" || w.price.length > 40)) return false;
+  if (w.closedText != null && (typeof w.closedText !== "string" || w.closedText.length > 200)) return false;
   if (doc.cols != null) {
     if (typeof doc.cols !== "object" || Array.isArray(doc.cols)) return false;
     for (const [bid, cols] of Object.entries(doc.cols)) {
