@@ -232,8 +232,9 @@ const items = () => S.doc.items;
 const MOVABLE = ["soup", "grill1", "grill2", "grill3"];
 /* [left, right] plus, on boards with a tray, [not on the board] */
 const defaultCols = bid => [...BOARDS[bid].cols.map(c => c.items), ...(BOARDS[bid].tray ? [BOARDS[bid].tray] : [])];
-const colsOf = bid => (S.doc && S.doc.cols && S.doc.cols[bid]) || defaultCols(bid);
-const boardItems = b => b === "wok" ? S.doc.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items) : colsOf(b).slice(0, 2).flat();
+/* only dishes that exist in the data: a page newer than its data file still loads */
+const colsOf = bid => ((S.doc && S.doc.cols && S.doc.cols[bid]) || defaultCols(bid)).map(c => S.doc ? c.filter(id => S.doc.items[id]) : c);
+const boardItems = b => b === "wok" ? S.doc.wok.slots : BOARDS[b].rows ? BOARDS[b].rows.flatMap(r => r.items).filter(id => S.doc.items[id]) : colsOf(b).slice(0, 2).flat();
 
 /* ================= board layout ================= */
 const baseCache = {};
@@ -280,7 +281,7 @@ function layout(st, bid, live) {
     const shown = B.rows.filter(r => r.items.some(id => I[id] && !I[id].hidden)), caps = B.rowCaps[shown.length] || [];
     shown.forEach((r, ri) => {
       r = { ...r, cap: caps[ri] };
-      const vis = r.items.filter(id => !I[id].hidden);
+      const vis = r.items.filter(id => I[id] && !I[id].hidden);
       const centers = vis.length === r.items.length ? r.centers : vis.length === 1 ? [960] : r.centers;
       vis.forEach((id, k) => {
         const it = I[id], el = line("nm", 0, r.cap + 0.708 * B.S, B.S, esc(it.name) + priceHTML(it.price), id);
@@ -431,7 +432,7 @@ function renderEditor() {
       <div class="wokgrid">${d.wok.pool.map((id, k) => dcardHTML(id, "pool", k)).join("")}</div>
       <p class="hint" style="margin:4px 0 0">On a touch screen, tap a dish, then tap the dish to swap it with.</p></div></section>`;
   } else {
-    if (B.rows) body += B.rows.map((r, i) => `<section class="card"><div class="card-h"><b>${i ? "Second row" : "Top row"}</b></div><div class="card-b">${r.items.map(id => rowHTML(id)).join("")}</div></section>`).join("");
+    if (B.rows) body += B.rows.map((r, i) => `<section class="card"><div class="card-h"><b>${i ? "Second row" : "Top row"}</b></div><div class="card-b">${r.items.filter(id => d.items[id]).map(id => rowHTML(id)).join("")}</div></section>`).join("");
     else {
       const mv = MOVABLE.includes(S.board) && S.canWrite;
       body += colsOf(S.board).map((ids, ci) => `<section class="card"><div class="card-h"><b>${["Left column", "Right column", "Not on the board"][ci]}</b>${mv && ci === 0 ? "<small>Drag the dots to move a dish, or use the arrows to send it across</small>" : ci === 2 ? "<small>Drag a dish onto a column to add it to the board</small>" : ""}</div>
@@ -587,7 +588,7 @@ function normalize(doc) {
   if (doc.cols && typeof doc.cols === "object") {
     for (const bid of Object.keys(doc.cols)) {
       if (!MOVABLE.includes(bid)) { delete doc.cols[bid]; continue; }
-      const own = defaultCols(bid), mine = new Set(own.flat()), seen = new Set(), saved = doc.cols[bid];
+      const own = defaultCols(bid).map(c => c.filter(id => doc.items[id])), mine = new Set(own.flat()), seen = new Set(), saved = doc.cols[bid];
       let cols = Array.isArray(saved) && saved.length >= 2 ? own.map((c, i) => saved[i] || []) : own.map(c => c.slice());
       cols = cols.map(c => (Array.isArray(c) ? c : []).filter(id => mine.has(id) && !seen.has(id) && seen.add(id)));
       /* a dish new to the design goes in its usual column, just above the dish that follows it there */
