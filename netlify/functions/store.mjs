@@ -131,7 +131,7 @@ export default async (req, context) => {
       /* Digital boards: only the changes this code may make (see _lib/digital.mjs) */
       const current = (await store.get(`menus/${id}`, { type: "json" })) || digitalSeed[id];
       if (!current) return json({ error: "Unknown board set" }, 404);
-      if (!digitalEditAllowed(current, data, (meta.perms || []).includes("digital-pricing"))) return json({ error: "not_permitted" }, 403);
+      if (!digitalEditAllowed(current, data, (meta.perms || []).includes("digital-pricing"), digitalSeed[id])) return json({ error: "not_permitted" }, 403);
     }
     if (coll === "menus") {
       const before = await store.get(`menus/${id}`, { type: "json" });
